@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sister Burguer | Financial Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="SB_V.1.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Modern Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo" style="background: transparent;">
+                    <img src="SB_V.1.ico" alt="Logo Sister Burguer" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div class="brand-text">
+                    <h2>Sister<span>Burguer</span></h2>
+                    <p>Admin Suite</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <i data-lucide="layout-grid"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="sales">
+                    <i data-lucide="trending-up"></i>
+                    <span>Ventas</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="expenses">
+                    <i data-lucide="receipt"></i>
+                    <span>Gastos</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="inventory">
+                    <i data-lucide="package"></i>
+                    <span>Inventario</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <img src="SB_V.1.ico" alt="User" style="object-fit: cover; background: white;">
+                    <div class="user-info">
+                        <span class="name">Gerencia</span>
+                        <span class="status">Online</span>
+                    </div>
+                </div>
+                <button class="btn-logout">
+                    <i data-lucide="log-out"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-container">
+            <header class="top-bar">
+                <div class="search-bar">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Buscar transacción o reporte...">
+                </div>
+                <div class="top-actions">
+                    <button class="btn-icon notification">
+                        <i data-lucide="bell"></i>
+                        <span class="badge"></span>
+                    </button>
+                    <button class="btn-primary" id="btn-open-form">
+                        <i data-lucide="plus"></i>
+                        <span>Nueva Entrada</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-scroll">
+                <section class="dashboard-view active" id="dashboard">
+                    <div class="view-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div class="title-group" style="display: flex; align-items: center; gap: 1.5rem; flex-direction: row;">
+                            <h1 style="margin: 0;">Resumen Financiero</h1>
+                            <div class="date-controls" style="display: flex; align-items: center; gap: 0.3rem; background: white; padding: 0.2rem; border-radius: 8px; border: 1px solid #edf2f7;">
+                                <button id="btn-prev-date" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; color: var(--text-light);"><i data-lucide="chevron-left" style="width: 20px; height: 20px;"></i></button>
+                                <input type="date" id="analysis-date" style="border: none; background: transparent; padding: 0.2rem; font-family: inherit; color: var(--text-main); outline: none; cursor: pointer; font-weight: 500;">
+                                <button id="btn-next-date" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; color: var(--text-light);"><i data-lucide="chevron-right" style="width: 20px; height: 20px;"></i></button>
+                            </div>
+                        </div>
+                        <div class="period-selector" id="period-filters">
+                            <button class="active" data-period="dia">Día</button>
+                            <button data-period="semana">Semana</button>
+                            <button data-period="mes">Mes</button>
+                            <button data-period="año">Año</button>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="label">Ventas Totales</span>
+                                <div class="trend up">
+                                    <i data-lucide="arrow-up-right"></i>
+                                    <span>12%</span>
+                                </div>
+                            </div>
+                            <div class="kpi-body">
+                                <h2 class="value">$1,240,500</h2>
+                                <p class="sub-label">COP vs Ayer</p>
+                            </div>
+                            <div class="kpi-progress">
+                                <div class="progress-bar" style="width: 75%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="label">Gastos Operativos</span>
+                                <div class="trend down">
+                                    <i data-lucide="arrow-down-right"></i>
+                                    <span>5%</span>
+                                </div>
+                            </div>
+                            <div class="kpi-body">
+                                <h2 class="value">$450,200</h2>
+                                <p class="sub-label">COP Hoy</p>
+                            </div>
+                            <div class="kpi-progress">
+                                <div class="progress-bar warning" style="width: 40%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="label">Utilidad Neta</span>
+                                <div class="trend up">
+                                    <i data-lucide="arrow-up-right"></i>
+                                    <span>8%</span>
+                                </div>
+                            </div>
+                            <div class="kpi-body">
+                                <h2 class="value">$790,300</h2>
+                                <p class="sub-label">COP Estimado</p>
+                            </div>
+                            <div class="kpi-progress">
+                                <div class="progress-bar success" style="width: 65%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="label">Ticket Promedio</span>
+                                <div class="trend neutral">
+                                    <i data-lucide="minus"></i>
+                                    <span>0%</span>
+                                </div>
+                            </div>
+                            <div class="kpi-body">
+                                <h2 class="value">$35,000</h2>
+                                <p class="sub-label">COP por pedido</p>
+                            </div>
+                            <div class="kpi-progress">
+                                <div class="progress-bar info" style="width: 55%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="charts-row">
+                        <div class="chart-card large">
+                            <div class="card-header">
+                                <h3>Flujo de Caja Semanal</h3>
+                                <div class="chart-legend">
+                                    <span class="dot sales"></span> Ventas
+                                    <span class="dot expenses"></span> Gastos
+                                </div>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="mainChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card small">
+                            <div class="card-header">
+                                <h3>Categorías de Gasto</h3>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="pieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="recent-activity">
+                        <div class="card-header">
+                            <h3>Últimos Movimientos</h3>
+                            <button class="btn-text">Ver todo</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Descripción</th>
+                                        <th>Categoría</th>
+                                        <th>Monto</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-body">
+                                    <!-- Data injected by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Vista de Ventas -->
+                <section class="dashboard-view" id="sales" style="display: none;">
+                    <div class="view-header">
+                        <div class="title-group">
+                            <h1>Historial de Ventas</h1>
+                            <p>Registro completo de VENTAS_DIARIAS</p>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Plato</th>
+                                        <th>Cant.</th>
+                                        <th>Método</th>
+                                        <th>Domicilio</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sales-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Vista de Gastos & Compras -->
+                <section class="dashboard-view" id="expenses" style="display: none;">
+                    <div class="view-header">
+                        <div class="title-group">
+                            <h1>Gastos y Compras</h1>
+                            <p>Registro de GASTOS_OPERATIVOS y COMPRAS_INSUMOS</p>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Fecha</th>
+                                        <th>Categoría/Insumo</th>
+                                        <th>Descripción/Proveedor</th>
+                                        <th>Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenses-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Vista de Inventario -->
+                <section class="dashboard-view" id="inventory" style="display: none;">
+                    <div class="view-header">
+                        <div class="title-group">
+                            <h1>Alerta de Inventario</h1>
+                            <p>Estado actual según ALERTA_INVENTARIO</p>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID Insumo</th>
+                                        <th>Nombre</th>
+                                        <th>Inventario Inicial</th>
+                                        <th>Cantidad Comprada</th>
+                                        <th>Disponible para Uso</th>
+                                        <th>Stock Calculado</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Entry Modal -->
+    <div class="modal-overlay" id="entry-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Nueva Transacción</h2>
+                <button class="btn-close" id="btn-close-modal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <form id="entry-form">
+                <div class="form-tabs">
+                    <label class="tab-option">
+                        <input type="radio" name="entry-type" value="sale" checked>
+                        <span>Venta</span>
+                    </label>
+                    <label class="tab-option">
+                        <input type="radio" name="entry-type" value="purchase">
+                        <span>Compra Insumo</span>
+                    </label>
+                    <label class="tab-option">
+                        <input type="radio" name="entry-type" value="expense">
+                        <span>Gasto Operativo</span>
+                    </label>
+                </div>
+                
+                <div class="form-body" id="form-venta" style="display: block;">
+                    <div class="form-group">
+                        <label>Fecha de la Transacción</label>
+                        <input type="date" id="v-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Plato</label>
+                        <select id="v-plato" required>
+                            <option value="">Cargando menú...</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cantidad</label>
+                            <input type="number" id="v-cantidad" placeholder="1" value="1" required min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Método de Pago</label>
+                            <select id="v-pago" required>
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Transferencia">Transferencia</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>¿Domicilio?</label>
+                            <select id="v-domicilio">
+                                <option value="NO">NO</option>
+                                <option value="SI">SI</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Total Venta ($)</label>
+                            <input type="number" id="v-total" placeholder="0" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-body" id="form-gasto" style="display: none;">
+                    <div class="form-group">
+                        <label>Fecha del Gasto</label>
+                        <input type="date" id="g-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="g-categoria" required>
+                            <option value="Mobiliario (Activos)">Mobiliario (Activos)</option>
+                            <option value="Arriendo">Arriendo</option>
+                            <option value="Servicios">Servicios</option>
+                            <option value="Nomina">Nómina</option>
+                            <option value="Prestamos">Préstamos</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" id="g-desc" placeholder="Ej: Pago de Energía" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor ($)</label>
+                            <input type="number" id="g-valor" placeholder="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Método Pago</label>
+                            <select id="g-pago" required>
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Transferencia">Transferencia</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formulario de Compra Insumos -->
+                <div class="form-body" id="form-compra" style="display: none;">
+                    <div class="form-group">
+                        <label>Fecha de la Compra</label>
+                        <input type="date" id="c-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Proveedor / Descripción</label>
+                        <input type="text" id="c-proveedor" placeholder="Ej: Carnicería Don Pepe" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Insumo</label>
+                            <input type="text" id="c-insumo" placeholder="Ej: Carne Molida" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad (U/Kg)</label>
+                            <input type="number" id="c-cantidad" placeholder="1" value="1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor Total ($)</label>
+                            <input type="number" id="c-valor" placeholder="0" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="btn-cancel">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
