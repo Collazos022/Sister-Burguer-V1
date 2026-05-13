@@ -257,10 +257,18 @@ body {
 }
 
 .view-header {
+    position: sticky;
+    top: -2rem;
+    left: 0;
+    width: 100%;
+    background: var(--bg-main);
+    z-index: 50;
+    margin: -2rem -2rem 2rem -2rem;
+    padding: 2rem 2rem 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .title-group h1 {
@@ -421,7 +429,7 @@ body {
 }
 
 .table-wrapper {
-    overflow-x: auto;
+    width: 100%;
 }
 
 .data-table {
@@ -431,12 +439,16 @@ body {
 }
 
 .data-table th {
+    position: sticky;
+    top: 75px; /* Offset to stay just below the sticky view-header */
+    background: white;
+    z-index: 40;
     text-align: left;
     padding: 1rem;
     color: var(--text-muted);
     font-weight: 600;
     font-size: 0.85rem;
-    border-bottom: 1px solid #edf2f7;
+    box-shadow: 0 1px 0 #edf2f7; /* Better than border-bottom for sticky headers */
 }
 
 .data-table td {
@@ -594,4 +606,83 @@ body {
 
 .dashboard-view.active {
     animation: fadeIn 0.4s ease forwards;
+}
+
+/* Responsive Design (Mobile & Tablets) */
+@media (max-width: 768px) {
+    :root {
+        --sidebar-width: 80px; /* Collapsed sidebar width */
+    }
+
+    .sidebar {
+        padding: 1rem 0.5rem;
+    }
+
+    .brand {
+        margin-bottom: 2rem !important;
+    }
+
+    .brand-logo {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .nav-item span {
+        display: none; /* Hide text */
+    }
+
+    .nav-item {
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .nav-item i {
+        margin: 0;
+    }
+
+    .sidebar-footer {
+        flex-direction: column;
+        gap: 1rem;
+        padding-top: 1rem;
+    }
+
+    .user-info {
+        display: none; /* Hide user name */
+    }
+
+    .user-card img {
+        margin: 0 auto;
+    }
+
+    /* Main Layout Adjustments */
+    .search-bar {
+        display: none; /* Hide search on mobile */
+    }
+
+    .top-bar {
+        padding: 0 1rem;
+        justify-content: flex-end; /* Align right since search is gone */
+    }
+
+    .content-scroll {
+        padding: 1rem;
+    }
+
+    .charts-row {
+        grid-template-columns: 1fr; /* Stack charts */
+    }
+
+    .kpi-grid {
+        grid-template-columns: 1fr 1fr; /* 2 columns on mobile */
+    }
+
+    .form-row {
+        grid-template-columns: 1fr; /* Stack form inputs */
+    }
+}
+
+@media (max-width: 480px) {
+    .kpi-grid {
+        grid-template-columns: 1fr; /* 1 column on very small screens */
+    }
 }
