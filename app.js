@@ -1,48 +1,57 @@
-// Sister Burguer - Admin Dashboard Logic
+
 const API_URL = 'https://script.google.com/macros/s/AKfycbxH1PK-Tfy-Zon2OluMTCnhPs5XORiGN32nxbmm4UQ8JR_DHIbXln8vr6CGGxaZGKxKAw/exec';
 
 let dbData = { ventas: [], gastos: [], compras: [], inventario: [], menu: [] };
 let currentPeriod = 'semana';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Lucide Icons
-    lucide.createIcons();
-
-    // Sidebar Navigation
-    const navItems = document.querySelectorAll('.nav-item');
+    const mainTitle = document.getElementById('main-title');
+    const dateInput = document.getElementById('analysis-date');
+    const navItems = document.querySelectorAll('.nav-item[data-tab]');
     const views = document.querySelectorAll('.dashboard-view');
+    const modal = document.getElementById('entry-modal');
+    const entryForm = document.getElementById('entry-form');
+    const btnOpen = document.getElementById('btn-open-form');
+    const btnClose = document.getElementById('btn-close-modal');
+    const btnCancel = document.getElementById('btn-cancel');
+
+    const setDefaultDates = () => {
+        const tStr = new Date().toISOString().split('T')[0];
+        ['v-date', 'g-date', 'c-date'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.value = tStr;
+        });
+    };
+
+    lucide.createIcons();
+    
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
-            navItems.forEach(n => n.classList.remove('active'));
-            views.forEach(v => v.style.display = 'none');
+            const tabId = item.getAttribute('data-tab');
             
-            item.classList.add('active');
-            const targetView = document.getElementById(item.getAttribute('data-tab'));
-            if(targetView) targetView.style.display = 'block';
+            navItems.forEach(n => n.classList.toggle('active', n === item));
+            views.forEach(v => v.style.display = v.id === tabId ? 'block' : 'none');
+            
+            const titles = {
+                'dashboard': 'Resumen Financiero',
+                'sales': 'Historial de Ventas',
+                'expenses': 'Gastos y Compras',
+                'inventory': 'Alerta de Inventario'
+            };
+            mainTitle.textContent = titles[tabId] || 'Panel Administrativo';
         });
     });
 
-    // Helper to set default form dates
-    const setDefaultDates = () => {
-        const tStr = new Date().toISOString().split('T')[0];
-        document.getElementById('v-date').value = tStr;
-        document.getElementById('g-date').value = tStr;
-        document.getElementById('c-date').value = tStr;
-    };
-
-    // Init Date Picker to Today
-    const dateInput = document.getElementById('analysis-date');
     const todayStr = new Date().toISOString().split('T')[0];
     dateInput.value = todayStr;
+    ['v-date', 'g-date', 'c-date'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = todayStr;
+    });
 
-    // Default dates in forms to today
-    setDefaultDates();
-
-    // Listen to changes
     dateInput.addEventListener('change', updateDashboard);
-
-    // Date Navigation Arrows
+    
     document.getElementById('btn-prev-date').addEventListener('click', () => {
         let d = new Date(dateInput.value + 'T12:00:00');
         if (currentPeriod === 'dia') d.setDate(d.getDate() - 1);
@@ -63,19 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDashboard();
     });
 
-    // Modal Logic
-    const modal = document.getElementById('entry-modal');
-    const btnOpen = document.getElementById('btn-open-form');
-    const btnClose = document.getElementById('btn-close-modal');
-    const btnCancel = document.getElementById('btn-cancel');
-    const entryForm = document.getElementById('entry-form');
+
 
     const toggleModal = () => modal.classList.toggle('active');
 
     btnOpen.addEventListener('click', toggleModal);
     btnClose.addEventListener('click', toggleModal);
+    btnCancel.addEventListener('click', toggleModal);
 
-    // Form Toggling
     const radioVenta = document.querySelector('input[value="sale"]');
     const radioGasto = document.querySelector('input[value="expense"]');
     const radioCompra = document.querySelector('input[value="purchase"]');
@@ -111,9 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
     radioVenta.addEventListener('change', toggleFormType);
     radioGasto.addEventListener('change', toggleFormType);
     radioCompra.addEventListener('change', toggleFormType);
-    toggleFormType(); // Init
-
-    // Period Filters
+    toggleFormType();
+    
     const periodButtons = document.querySelectorAll('#period-filters button');
     periodButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -124,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Form Submission
     entryForm.addEventListener('submit', (e) => {
         e.preventDefault();
         let payload = {};
@@ -174,8 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Registro guardado. Actualizando tablero...');
                 toggleModal();
                 entryForm.reset();
-                setDefaultDates(); // Restore default dates after reset
-                fetchData(); // Reload data
+                setDefaultDates();
+                fetchData();
             } else {
                 alert('Hubo un error: ' + data.message);
             }
@@ -190,52 +192,126 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Main Sales/Expenses Chart Init
     const mainCtx = document.getElementById('mainChart').getContext('2d');
     window.mainChartInstance = new Chart(mainCtx, {
         type: 'line',
         data: {
             labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
             datasets: [
-                { label: 'Ventas', data: [], borderColor: '#E63946', backgroundColor: 'rgba(230, 57, 70, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#E63946' },
-                { label: 'Gastos', data: [], borderColor: '#1D3557', backgroundColor: 'rgba(29, 53, 87, 0.05)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 }
+                { label: 'Ventas', data: [], borderColor: '#FF0080', backgroundColor: 'rgba(255, 0, 128, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#FF0080' },
+                { label: 'Gastos', data: [], borderColor: '#FFD60A', backgroundColor: 'rgba(255, 214, 10, 0.05)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 }
             ]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { callback: value => '$' + value.toLocaleString() } }, x: { grid: { display: false } } } }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+                legend: { display: false } 
+            }, 
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
+                    ticks: { 
+                        color: '#A0A0A0',
+                        callback: value => '$' + value.toLocaleString() 
+                    } 
+                }, 
+                x: { 
+                    grid: { display: false },
+                    ticks: { color: '#A0A0A0' }
+                } 
+            } 
+        }
     });
 
-    // Load Data
     fetchData();
 });
 
-// Fetch Real Data
-function fetchData() {
-    document.querySelectorAll('.kpi-card .value').forEach(el => el.textContent = "Cargando...");
+function populateSecondaryViews(startDate, endDate) {
+    const isFiltered = startDate && endDate;
     
-    fetch(API_URL)
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                dbData.ventas = data.ventas || [];
-                dbData.gastos = data.gastos || [];
-                dbData.compras = data.compras || [];
-                dbData.inventario = data.inventario || [];
-                dbData.menu = data.menu || [];
-                
-                populateMenu();
-                populateSecondaryViews();
-                updateDashboard();
-            } else {
-                alert("Error cargando datos de la base: " + data.message);
-            }
-        })
-        .catch(err => {
-            console.error("Error fetching data:", err);
-            alert("No se pudo descargar la base real. Mostrando datos locales de simulación.");
-        });
+    let salesHTML = '';
+    dbData.ventas.slice().reverse().forEach(v => {
+        let f = v.Fecha || v['Fecha '] || v.fecha || '';
+        if(!f) return;
+        
+        let parts = String(f).includes('/') ? String(f).split('/') : String(f).split('-');
+        if(parts.length < 3) return;
+        let vDate = String(f).includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(f + 'T12:00:00');
+
+        if (isFiltered) {
+            if (vDate < startDate || vDate > endDate) return;
+        }
+        
+        let dateStr = vDate.toLocaleDateString();
+        let plato = v['Nombre Plato Ref'] || v['Nombre Plato'] || v.Plato || v.plato || 'Venta Registrada';
+        let cant = v['Cantidad Vendida'] || v.Cantidad || v.cantidad || 1;
+        let metodo = v['Método Pago'] || v.Pago || v.pago || 'Efectivo';
+        let dom = v.Domicilio || v.domicilio || 'NO';
+        let total = Number(v['Total Venta'] || v.Total || v.total || 0);
+
+        salesHTML += `<tr>
+            <td>${dateStr}</td>
+            <td class="fw-500">${plato}</td>
+            <td>${cant}</td>
+            <td>${metodo}</td>
+            <td>${dom}</td>
+            <td class="text-success fw-700">$${total.toLocaleString()}</td>
+        </tr>`;
+    });
+    document.getElementById('sales-body').innerHTML = salesHTML || '<tr><td colspan="6" class="table-empty-msg">No hay ventas para este periodo</td></tr>';
+
+    let expHTML = '';
+    let unifiedExpenses = [];
+    dbData.gastos.forEach(g => unifiedExpenses.push({
+        tipo: 'Gasto Operativo', fecha: g.Fecha || '', cat: g['Categoría'] || g.Categoria || '', desc: g['Descripción'] || g.Descripcion || '', val: g.Valor || 0
+    }));
+    dbData.compras.forEach(c => unifiedExpenses.push({
+        tipo: 'Compra Insumo', fecha: c.Fecha || '', cat: c.Insumo || '', desc: c.Proveedor || '', val: c['Valor Total'] || c.Valor || 0
+    }));
+
+    unifiedExpenses.forEach(e => {
+        let f = e.fecha;
+        if(!f) return;
+        let parts = String(f).includes('/') ? String(f).split('/') : String(f).split('-');
+        if(parts.length < 3) return;
+        let eDate = String(f).includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(f + 'T12:00:00');
+
+        if (isFiltered) {
+            if (eDate < startDate || eDate > endDate) return;
+        }
+
+        const statusClass = e.tipo === 'Gasto Operativo' ? 'status-pending' : 'status-completed';
+        expHTML += `<tr>
+            <td><span class="badge-status ${statusClass}">${e.tipo}</span></td>
+            <td>${eDate.toLocaleDateString()}</td>
+            <td>${e.cat}</td>
+            <td>${e.desc}</td>
+            <td class="text-danger fw-600">$${Number(e.val).toLocaleString()}</td>
+        </tr>`;
+    });
+    document.getElementById('expenses-body').innerHTML = expHTML || '<tr><td colspan="5" class="table-empty-msg">No hay gastos/compras para este periodo</td></tr>';
+
+    let invHTML = '';
+    dbData.inventario.forEach(i => {
+        let name = i['Nombre Insumo'] || i.Nombre || '';
+        if(!name) return;
+        let stock = Number(i['Stock Calculado'] || i.Stock || 0);
+        let status = stock > 0 ? '<span class="badge-status status-completed">Suficiente</span>' : '<span class="badge-status status-danger">Reabastecer</span>';
+        invHTML += `<tr>
+            <td>${i['ID_Insumo'] || i.ID || ''}</td>
+            <td class="fw-600">${name}</td>
+            <td>${i['Inventario Inicial'] || 0}</td>
+            <td>${i['Cantidad Comprada'] || 0}</td>
+            <td>${i['Disponible para Uso'] || 0}</td>
+            <td class="fw-700">${stock}</td>
+            <td>${status}</td>
+        </tr>`;
+    });
+    document.getElementById('inventory-body').innerHTML = invHTML || '<tr><td colspan="7" class="table-empty-msg">Sin datos de inventario</td></tr>';
 }
 
-// Populate Menu Select and auto-calculate total
 function populateMenu() {
     const select = document.getElementById('v-plato');
     select.innerHTML = '<option value="">-- Selecciona un plato --</option>';
@@ -268,83 +344,31 @@ function populateMenu() {
     vDomicilio.addEventListener('change', recalcTotal);
 }
 
-// Populate History Tables (Ventas, Gastos, Inventario tabs)
-function populateSecondaryViews() {
-    // Ventas Completas
-    let salesHTML = '';
-    dbData.ventas.slice().reverse().forEach(v => {
-        let f = v.Fecha || v['Fecha '] || v.fecha || '';
-        let dateStr = f;
-        if(f) {
-            let parts = String(f).includes('/') ? String(f).split('/') : String(f).split('-');
-            if(parts.length >= 3) {
-                let vDate = String(f).includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(f + 'T12:00:00');
-                dateStr = vDate.toLocaleDateString();
+function fetchData() {
+    document.querySelectorAll('.kpi-card .value').forEach(el => el.textContent = "Cargando...");
+    
+    fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                dbData.ventas = data.ventas || [];
+                dbData.gastos = data.gastos || [];
+                dbData.compras = data.compras || [];
+                dbData.inventario = data.inventario || [];
+                dbData.menu = data.menu || [];
+                
+                populateMenu();
+                updateDashboard();
+            } else {
+                alert("Error cargando datos de la base: " + data.message);
             }
-        }
-        
-        let plato = v['Nombre Plato Ref'] || v['Nombre Plato'] || v.Plato || v.plato || 'Venta Registrada';
-        let cant = v['Cantidad Vendida'] || v.Cantidad || v.cantidad || 1;
-        let metodo = v['Método Pago'] || v.Pago || v.pago || 'Efectivo';
-        let dom = v.Domicilio || v.domicilio || 'NO';
-        let total = Number(v['Total Venta'] || v.Total || v.total || 0);
-
-        salesHTML += `<tr>
-            <td>${dateStr}</td>
-            <td style="font-weight: 500">${plato}</td>
-            <td>${cant}</td>
-            <td>${metodo}</td>
-            <td>${dom}</td>
-            <td style="color: #2A9D8F; font-weight: 600;">$${total.toLocaleString()}</td>
-        </tr>`;
-    });
-    document.getElementById('sales-body').innerHTML = salesHTML || '<tr><td colspan="6" style="text-align:center;">No hay ventas registradas</td></tr>';
-
-    // Gastos y Compras
-    let expHTML = '';
-    // Unificar gastos y compras
-    let unifiedExpenses = [];
-    dbData.gastos.forEach(g => unifiedExpenses.push({
-        tipo: 'Gasto Operativo', fecha: g.Fecha || '', cat: g['Categoría'] || g.Categoria || '', desc: g['Descripción'] || g.Descripcion || '', val: g.Valor || 0
-    }));
-    dbData.compras.forEach(c => unifiedExpenses.push({
-        tipo: 'Compra Insumo', fecha: c.Fecha || '', cat: c.Insumo || '', desc: c.Proveedor || '', val: c['Valor Total'] || c.Valor || 0
-    }));
-    // Ordenar por fecha descendente (muy básico)
-    unifiedExpenses.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-
-    unifiedExpenses.forEach(e => {
-        expHTML += `<tr>
-            <td><span class="badge-status" style="background: ${e.tipo === 'Gasto Operativo' ? '#f0f4f8' : '#e6f4ea'}; color: ${e.tipo === 'Gasto Operativo' ? '#1D3557' : '#2A9D8F'}">${e.tipo}</span></td>
-            <td>${e.fecha}</td>
-            <td>${e.cat}</td>
-            <td>${e.desc}</td>
-            <td style="color: #E76F51; font-weight: 600;">$${Number(e.val).toLocaleString()}</td>
-        </tr>`;
-    });
-    document.getElementById('expenses-body').innerHTML = expHTML || '<tr><td colspan="5" style="text-align:center;">No hay gastos/compras</td></tr>';
-
-    // Inventario
-    let invHTML = '';
-    dbData.inventario.forEach(i => {
-        let name = i['Nombre Insumo'] || i.Nombre || '';
-        if(!name) return;
-        let stock = Number(i['Stock Calculado'] || i.Stock || 0);
-        let status = stock > 0 ? '<span class="badge-status status-completed">Suficiente</span>' : '<span class="badge-status" style="background:#fee2e2;color:#991b1b">Reabastecer</span>';
-        invHTML += `<tr>
-            <td>${i['ID_Insumo'] || i.ID || ''}</td>
-            <td style="font-weight: 600">${name}</td>
-            <td>${i['Inventario Inicial'] || 0}</td>
-            <td>${i['Cantidad Comprada'] || 0}</td>
-            <td>${i['Disponible para Uso'] || 0}</td>
-            <td style="font-weight: 700">${stock}</td>
-            <td>${status}</td>
-        </tr>`;
-    });
-    document.getElementById('inventory-body').innerHTML = invHTML || '<tr><td colspan="7" style="text-align:center;">Sin datos de inventario</td></tr>';
+        })
+        .catch(err => {
+            console.error("Error fetching data:", err);
+            alert("No se pudo descargar la base real.");
+        });
 }
 
-// Logic to filter and process data for Dashboard
 function updateDashboard() {
     const selectedDateStr = document.getElementById('analysis-date').value;
     if(!selectedDateStr) return;
@@ -393,7 +417,6 @@ function updateDashboard() {
     let numVentas = 0;
     let txTableHTML = '';
 
-    // Agrupar Ventas
     dbData.ventas.forEach(v => {
         let f = v.Fecha || v['Fecha '] || '';
         let parts = String(f).includes('/') ? String(f).split('/') : String(f).split('-');
@@ -412,7 +435,7 @@ function updateDashboard() {
         if (isKPI) {
             totalVentas += monto;
             numVentas += 1;
-            txTableHTML += `<tr><td>${vDate.toLocaleDateString()}</td><td style="font-weight: 500">${v['Nombre Plato Ref'] || v.Plato || ''}</td><td><span class="dot" style="background: #E63946"></span> Venta</td><td style="color: #2A9D8F; font-weight: 700">+$${monto.toLocaleString()}</td><td><span class="badge-status status-completed">Completado</span></td></tr>`;
+            txTableHTML += `<tr><td>${vDate.toLocaleDateString()}</td><td class="fw-500">${v['Nombre Plato Ref'] || v.Plato || ''}</td><td><span class="dot primary"></span> Venta</td><td class="text-success fw-700">+$${monto.toLocaleString()}</td><td><span class="badge-status status-completed">Completado</span></td></tr>`;
         }
 
         if (vDate >= startDate && vDate <= endDate) {
@@ -430,7 +453,6 @@ function updateDashboard() {
         }
     });
 
-    // Unificar gastos y compras para la gráfica y KPIs
     let todosLosGastos = [...dbData.gastos, ...dbData.compras];
 
     todosLosGastos.forEach(g => {
@@ -451,7 +473,7 @@ function updateDashboard() {
             totalGastos += monto;
             let name = g['Descripción'] || g.Descripcion || g.Proveedor || g.Insumo || '';
             let tipo = g.Categoria || g['Categoría'] || 'Compra Insumo';
-            txTableHTML += `<tr><td>${gDate.toLocaleDateString()}</td><td style="font-weight: 500">${name}</td><td><span class="dot" style="background: #1D3557"></span> ${tipo}</td><td style="color: #E76F51; font-weight: 700">-$${monto.toLocaleString()}</td><td><span class="badge-status status-completed">Completado</span></td></tr>`;
+            txTableHTML += `<tr><td>${gDate.toLocaleDateString()}</td><td class="fw-500">${name}</td><td><span class="dot accent"></span> ${tipo}</td><td class="text-danger fw-700">-$${monto.toLocaleString()}</td><td><span class="badge-status status-completed">Completado</span></td></tr>`;
         }
 
         if (gDate >= startDate && gDate <= endDate) {
@@ -469,7 +491,6 @@ function updateDashboard() {
         }
     });
 
-    // Actualizar UI
     const kpiValues = document.querySelectorAll('.kpi-card .value');
     if(kpiValues.length >= 4) {
         kpiValues[0].textContent = '$' + totalVentas.toLocaleString();
@@ -478,9 +499,8 @@ function updateDashboard() {
         kpiValues[3].textContent = numVentas > 0 ? '$' + Math.round(totalVentas / numVentas).toLocaleString() : '$0';
     }
 
-    document.getElementById('transactions-body').innerHTML = txTableHTML || '<tr><td colspan="5" style="text-align:center; padding: 2rem;">No hay registros para este periodo.</td></tr>';
+    document.getElementById('transactions-body').innerHTML = txTableHTML || '<tr><td colspan="5" class="table-empty-msg">No hay registros para este periodo.</td></tr>';
 
-    // Actualizar Chart
     if (window.mainChartInstance) {
         window.mainChartInstance.data.labels = labels;
         window.mainChartInstance.data.datasets[0].data = salesChartData;
@@ -492,4 +512,6 @@ function updateDashboard() {
             window.mainChartInstance.update();
         }, 100);
     }
+
+    populateSecondaryViews(startDate, endDate);
 }
