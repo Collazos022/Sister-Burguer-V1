@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,13 @@
     <link rel="icon" type="image/x-icon" href="SB_V.1.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
     <div class="app-layout">
         <aside class="sidebar">
@@ -85,21 +88,18 @@
 
             <div class="content-scroll">
                 <section class="dashboard-view active" id="dashboard">
-
-
-
                     <div class="kpi-grid">
                         <div class="kpi-card">
                             <div class="kpi-header">
-                                <span class="label">Ventas Totales</span>
-                                <div class="trend up">
-                                    <i data-lucide="arrow-up-right"></i>
-                                    <span>12%</span>
+                                <span class="label">Ingreso Totales</span>
+                                <div class="trend neutral">
+                                    <i data-lucide="minus"></i>
+                                    <span>0%</span>
                                 </div>
                             </div>
                             <div class="kpi-body">
                                 <h2 class="value">$1,240,500</h2>
-                                <p class="sub-label">COP vs Ayer</p>
+                                <p class="sub-label">Por Ventas</p>
                             </div>
                             <div class="kpi-progress">
                                 <div class="progress-bar" style="width: 75%;"></div>
@@ -108,15 +108,15 @@
 
                         <div class="kpi-card">
                             <div class="kpi-header">
-                                <span class="label">Gastos Operativos</span>
-                                <div class="trend down">
-                                    <i data-lucide="arrow-down-right"></i>
-                                    <span>5%</span>
+                                <span class="label">Gastos Totales</span>
+                                <div class="trend neutral">
+                                    <i data-lucide="minus"></i>
+                                    <span>0%</span>
                                 </div>
                             </div>
                             <div class="kpi-body">
                                 <h2 class="value">$450,200</h2>
-                                <p class="sub-label">COP Hoy</p>
+                                <p class="sub-label">Insumos y Operaciones</p>
                             </div>
                             <div class="kpi-progress">
                                 <div class="progress-bar warning" style="width: 40%;"></div>
@@ -126,14 +126,14 @@
                         <div class="kpi-card">
                             <div class="kpi-header">
                                 <span class="label">Utilidad Neta</span>
-                                <div class="trend up">
-                                    <i data-lucide="arrow-up-right"></i>
-                                    <span>8%</span>
+                                <div class="trend neutral">
+                                    <i data-lucide="minus"></i>
+                                    <span>0%</span>
                                 </div>
                             </div>
                             <div class="kpi-body">
                                 <h2 class="value">$790,300</h2>
-                                <p class="sub-label">COP Estimado</p>
+                                <p class="sub-label">Por Periodo</p>
                             </div>
                             <div class="kpi-progress">
                                 <div class="progress-bar success" style="width: 65%;"></div>
@@ -142,7 +142,7 @@
 
                         <div class="kpi-card">
                             <div class="kpi-header">
-                                <span class="label">Ticket Promedio</span>
+                                <span class="label">Venta Promedio</span>
                                 <div class="trend neutral">
                                     <i data-lucide="minus"></i>
                                     <span>0%</span>
@@ -150,14 +150,13 @@
                             </div>
                             <div class="kpi-body">
                                 <h2 class="value">$35,000</h2>
-                                <p class="sub-label">COP por pedido</p>
+                                <p class="sub-label">Por pedido</p>
                             </div>
                             <div class="kpi-progress">
                                 <div class="progress-bar info" style="width: 55%;"></div>
                             </div>
                         </div>
                     </div>
-
 
                     <div class="charts-row">
                         <div class="chart-card large">
@@ -181,7 +180,6 @@
                             </div>
                         </div>
                     </div>
-
 
                     <div class="recent-activity">
                         <div class="card-header">
@@ -207,7 +205,6 @@
                     </div>
                 </section>
 
-
                 <section class="dashboard-view" id="sales" style="display: none;">
                     <div class="recent-activity">
                         <div class="table-wrapper">
@@ -228,7 +225,6 @@
                     </div>
                 </section>
 
-
                 <section class="dashboard-view" id="expenses" style="display: none;">
                     <div class="recent-activity">
                         <div class="table-wrapper">
@@ -247,7 +243,6 @@
                         </div>
                     </div>
                 </section>
-
 
                 <section class="dashboard-view" id="inventory" style="display: none;">
                     <div class="recent-activity">
@@ -273,7 +268,6 @@
         </main>
     </div>
 
-
     <div class="modal-overlay" id="entry-modal">
         <div class="modal-card">
             <div class="modal-header">
@@ -297,7 +291,7 @@
                         <span>Gasto Operativo</span>
                     </label>
                 </div>
-                
+
                 <div class="form-body" id="form-venta" style="display: block;">
                     <div class="form-group">
                         <label>Fecha de la Transacción</label>
@@ -371,7 +365,6 @@
                         </div>
                     </div>
                 </div>
-                
 
                 <div class="form-body" id="form-compra" style="display: none;">
                     <div class="form-group">
@@ -399,7 +392,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="modal-footer">
                     <button type="button" class="btn-secondary" id="btn-cancel">Cancelar</button>
                     <button type="submit" class="btn-primary">Guardar Registro</button>
@@ -410,4 +403,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>

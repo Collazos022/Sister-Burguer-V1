@@ -2,7 +2,7 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbxH1PK-Tfy-Zon2OluMTCnhPs5XORiGN32nxbmm4UQ8JR_DHIbXln8vr6CGGxaZGKxKAw/exec';
 
 let dbData = { ventas: [], gastos: [], compras: [], inventario: [], menu: [] };
-let currentPeriod = 'semana';
+let currentPeriod = 'dia';
 
 document.addEventListener('DOMContentLoaded', () => {
     const mainTitle = document.getElementById('main-title');
@@ -71,8 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dateInput.value = d.toISOString().split('T')[0];
         updateDashboard();
     });
-
-
 
     const toggleModal = () => modal.classList.toggle('active');
 
@@ -225,6 +223,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    window.pieChartInstance = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: ['#FF0080', '#FFD60A', '#00D1FF', '#39FF14', '#9D4EDD', '#FF9100'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#A0A0A0', padding: 20, font: { size: 12 } }
+                }
+            }
+        }
+    });
+
     fetchData();
 });
 
@@ -239,6 +262,7 @@ function populateSecondaryViews(startDate, endDate) {
         let parts = String(f).includes('/') ? String(f).split('/') : String(f).split('-');
         if(parts.length < 3) return;
         let vDate = String(f).includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(f + 'T12:00:00');
+        vDate.setHours(0,0,0,0);
 
         if (isFiltered) {
             if (vDate < startDate || vDate > endDate) return;
@@ -268,7 +292,7 @@ function populateSecondaryViews(startDate, endDate) {
         tipo: 'Gasto Operativo', fecha: g.Fecha || '', cat: g['Categoría'] || g.Categoria || '', desc: g['Descripción'] || g.Descripcion || '', val: g.Valor || 0
     }));
     dbData.compras.forEach(c => unifiedExpenses.push({
-        tipo: 'Compra Insumo', fecha: c.Fecha || '', cat: c.Insumo || '', desc: c.Proveedor || '', val: c['Valor Total'] || c.Valor || 0
+        tipo: 'Compra Insumo', fecha: c.Fecha || '', cat: c.Insumo || '', desc: c.Proveedor || '', val: c['Costo Total'] || c.Valor || 0
     }));
 
     unifiedExpenses.forEach(e => {
@@ -277,6 +301,7 @@ function populateSecondaryViews(startDate, endDate) {
         let parts = String(f).includes('/') ? String(f).split('/') : String(f).split('-');
         if(parts.length < 3) return;
         let eDate = String(f).includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(f + 'T12:00:00');
+        eDate.setHours(0,0,0,0);
 
         if (isFiltered) {
             if (eDate < startDate || eDate > endDate) return;
@@ -358,7 +383,11 @@ function fetchData() {
                 dbData.menu = data.menu || [];
                 
                 populateMenu();
-                updateDashboard();
+                try {
+                    updateDashboard();
+                } catch (e) {
+                    console.error("UI Update Error:", e);
+                }
             } else {
                 alert("Error cargando datos de la base: " + data.message);
             }
@@ -374,6 +403,7 @@ function updateDashboard() {
     if(!selectedDateStr) return;
     
     const targetDate = new Date(selectedDateStr + 'T12:00:00');
+    targetDate.setHours(0,0,0,0);
     
     let startDate = new Date(targetDate);
     let endDate = new Date(targetDate);
@@ -381,12 +411,26 @@ function updateDashboard() {
     let labels = [];
     let salesChartData = [];
     let expensesChartData = [];
+    let chartStartDate = new Date(startDate);
+    let chartEndDate = new Date(endDate);
+
+    let prevStartDate = new Date(startDate);
+    let prevEndDate = new Date(endDate);
 
     if (currentPeriod === 'dia') {
+        startDate = new Date(targetDate);
+        endDate = new Date(targetDate);
+        
+        prevStartDate.setDate(startDate.getDate() - 1);
+        prevEndDate.setDate(endDate.getDate() - 1);
+        
         const day = targetDate.getDay();
         const diff = targetDate.getDate() - day + (day === 0 ? -6 : 1);
-        startDate = new Date(targetDate.setDate(diff));
-        endDate = new Date(targetDate.setDate(diff + 6));
+        chartStartDate = new Date(targetDate);
+        chartStartDate.setDate(diff);
+        chartEndDate = new Date(chartStartDate);
+        chartEndDate.setDate(chartStartDate.getDate() + 6);
+        
         labels = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
         salesChartData = Array(7).fill(0);
         expensesChartData = Array(7).fill(0);
@@ -395,33 +439,69 @@ function updateDashboard() {
         const diff = targetDate.getDate() - day + (day === 0 ? -6 : 1);
         startDate = new Date(targetDate.setDate(diff));
         endDate = new Date(targetDate.setDate(diff + 6));
+        
+        prevStartDate = new Date(startDate);
+        prevStartDate.setDate(startDate.getDate() - 7);
+        prevEndDate = new Date(endDate);
+        prevEndDate.setDate(endDate.getDate() - 7);
+
         labels = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
         salesChartData = Array(7).fill(0);
         expensesChartData = Array(7).fill(0);
+        chartStartDate = new Date(startDate);
+        chartEndDate = new Date(endDate);
     } else if (currentPeriod === 'mes') {
         startDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
         endDate = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+        
+        prevStartDate = new Date(startDate);
+        prevStartDate.setMonth(startDate.getMonth() - 1);
+        prevEndDate = new Date(endDate);
+        prevEndDate.setDate(0); 
+
         labels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
         salesChartData = Array(4).fill(0);
         expensesChartData = Array(4).fill(0);
+        chartStartDate = new Date(startDate);
+        chartEndDate = new Date(endDate);
     } else if (currentPeriod === 'año') {
         startDate = new Date(targetDate.getFullYear(), 0, 1);
         endDate = new Date(targetDate.getFullYear(), 11, 31, 23, 59, 59);
+        
+        prevStartDate = new Date(startDate);
+        prevStartDate.setFullYear(startDate.getFullYear() - 1);
+        prevEndDate = new Date(endDate);
+        prevEndDate.setFullYear(endDate.getFullYear() - 1);
+
         labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         salesChartData = Array(12).fill(0);
         expensesChartData = Array(12).fill(0);
+        chartStartDate = new Date(startDate);
+        chartEndDate = new Date(endDate);
     }
+    
+    startDate.setHours(0,0,0,0);
+    endDate.setHours(23,59,59,999);
+    prevStartDate.setHours(0,0,0,0);
+    prevEndDate.setHours(23,59,59,999);
+    chartStartDate.setHours(0,0,0,0);
+    chartEndDate.setHours(23,59,59,999);
 
     let totalVentas = 0;
+    let prevTotalVentas = 0;
     let totalGastos = 0;
+    let prevTotalGastos = 0;
     let numVentas = 0;
+    let prevNumVentas = 0;
     let txTableHTML = '';
+    let expenseCategories = {};
 
     dbData.ventas.forEach(v => {
         let f = v.Fecha || v['Fecha '] || '';
         let parts = String(f).includes('/') ? String(f).split('/') : String(f).split('-');
         if(parts.length < 3) return;
         let vDate = String(f).includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(f + 'T12:00:00');
+        vDate.setHours(0,0,0,0);
         
         let monto = Number(v['Total Venta'] || v.Total || 0);
         
@@ -438,7 +518,12 @@ function updateDashboard() {
             txTableHTML += `<tr><td>${vDate.toLocaleDateString()}</td><td class="fw-500">${v['Nombre Plato Ref'] || v.Plato || ''}</td><td><span class="dot primary"></span> Venta</td><td class="text-success fw-700">+$${monto.toLocaleString()}</td><td><span class="badge-status status-completed">Completado</span></td></tr>`;
         }
 
-        if (vDate >= startDate && vDate <= endDate) {
+        if (vDate >= prevStartDate && vDate <= prevEndDate) {
+            prevTotalVentas += monto;
+            prevNumVentas += 1;
+        }
+
+        if (vDate >= chartStartDate && vDate <= chartEndDate) {
             if (currentPeriod === 'mes') {
                 let weekIdx = Math.floor((vDate.getDate() - 1) / 7);
                 if(weekIdx > 3) weekIdx = 3;
@@ -460,7 +545,8 @@ function updateDashboard() {
         let parts = String(f).includes('/') ? String(f).split('/') : String(f).split('-');
         if(parts.length < 3) return;
         let gDate = String(f).includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(f + 'T12:00:00');
-        let monto = Number(g.Valor || g['Valor Total'] || 0);
+        gDate.setHours(0,0,0,0);
+        let monto = Number(g.Valor || g['Costo Total'] || 0);
 
         let isKPI = false;
         if (currentPeriod === 'dia') {
@@ -474,9 +560,15 @@ function updateDashboard() {
             let name = g['Descripción'] || g.Descripcion || g.Proveedor || g.Insumo || '';
             let tipo = g.Categoria || g['Categoría'] || 'Compra Insumo';
             txTableHTML += `<tr><td>${gDate.toLocaleDateString()}</td><td class="fw-500">${name}</td><td><span class="dot accent"></span> ${tipo}</td><td class="text-danger fw-700">-$${monto.toLocaleString()}</td><td><span class="badge-status status-completed">Completado</span></td></tr>`;
+            
+            expenseCategories[tipo] = (expenseCategories[tipo] || 0) + monto;
         }
 
-        if (gDate >= startDate && gDate <= endDate) {
+        if (gDate >= prevStartDate && gDate <= prevEndDate) {
+            prevTotalGastos += monto;
+        }
+
+        if (gDate >= chartStartDate && gDate <= chartEndDate) {
             if (currentPeriod === 'mes') {
                 let weekIdx = Math.floor((gDate.getDate() - 1) / 7);
                 if(weekIdx > 3) weekIdx = 3;
@@ -499,6 +591,45 @@ function updateDashboard() {
         kpiValues[3].textContent = numVentas > 0 ? '$' + Math.round(totalVentas / numVentas).toLocaleString() : '$0';
     }
 
+    const updateTrend = (index, current, previous) => {
+        const trendEl = document.querySelectorAll('.kpi-card .trend')[index];
+        const subLabelEl = document.querySelectorAll('.kpi-card .sub-label')[index];
+        if(!trendEl || !subLabelEl) return;
+
+        let diff = previous === 0 ? (current > 0 ? 100 : 0) : ((current - previous) / previous) * 100;
+        let isUp = diff > 0;
+        const isNeutral = Math.abs(diff) < 0.01;
+
+        trendEl.className = `trend ${isUp ? (index === 1 ? 'down' : 'up') : (isNeutral ? 'neutral' : (index === 1 ? 'up' : 'down'))}`;
+        
+        const iconEl = trendEl.querySelector('i') || trendEl.querySelector('svg');
+        if (iconEl) {
+            iconEl.setAttribute('data-lucide', isUp ? 'arrow-up-right' : (isNeutral ? 'minus' : 'arrow-down-right'));
+        }
+        
+        const spanEl = trendEl.querySelector('span');
+        if (spanEl) {
+            spanEl.textContent = `${Math.abs(Math.round(diff))}%`;
+        }
+
+        const periodNames = { 'dia': 'Diarios', 'semana': 'Semanales', 'mes': 'Mensuales', 'año': 'Anuales' };
+        
+        let label = '';
+        if(index === 0) label = `Ventas ${periodNames[currentPeriod]}`;
+        else if(index === 1) label = `Gastos ${periodNames[currentPeriod]}`;
+        else if(index === 2) label = `Utilidad ${periodNames[currentPeriod]}`;
+        else if(index === 3) label = `Ticket Promedio`;
+        
+        subLabelEl.textContent = label;
+    };
+
+    updateTrend(0, totalVentas, prevTotalVentas);
+    updateTrend(1, totalGastos, prevTotalGastos);
+    updateTrend(2, totalVentas - totalGastos, prevTotalVentas - prevTotalGastos);
+    updateTrend(3, numVentas > 0 ? totalVentas / numVentas : 0, prevNumVentas > 0 ? prevTotalVentas / prevNumVentas : 0);
+
+    lucide.createIcons();
+
     document.getElementById('transactions-body').innerHTML = txTableHTML || '<tr><td colspan="5" class="table-empty-msg">No hay registros para este periodo.</td></tr>';
 
     if (window.mainChartInstance) {
@@ -511,6 +642,12 @@ function updateDashboard() {
             window.mainChartInstance.data.datasets[1].data = expensesChartData;
             window.mainChartInstance.update();
         }, 100);
+    }
+
+    if (window.pieChartInstance) {
+        window.pieChartInstance.data.labels = Object.keys(expenseCategories);
+        window.pieChartInstance.data.datasets[0].data = Object.values(expenseCategories);
+        window.pieChartInstance.update();
     }
 
     populateSecondaryViews(startDate, endDate);

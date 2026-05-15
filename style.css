@@ -153,8 +153,6 @@ body {
     transform: translateY(-1px);
 }
 
-
-
 .sidebar-footer {
     border-top: 1px solid var(--border-input);
     padding-top: 1.5rem;
@@ -234,8 +232,6 @@ body {
     gap: 1.5rem;
     flex-wrap: wrap;
 }
-
-
 
 .btn-primary {
     background: var(--primary);
