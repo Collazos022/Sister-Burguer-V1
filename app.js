@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
             datasets: [
                 { label: 'Ventas', data: [], borderColor: '#FF0080', backgroundColor: 'rgba(255, 0, 128, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#FF0080' },
-                { label: 'Gastos', data: [], borderColor: '#FFD60A', backgroundColor: 'rgba(255, 214, 10, 0.05)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0 }
+                { label: 'Gastos', data: [], borderColor: '#FFD60A', backgroundColor: 'rgba(255, 214, 10, 0.05)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#FFD60A' }
             ]
         },
         options: { 
@@ -212,7 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
                     ticks: { 
                         color: '#A0A0A0',
-                        callback: value => '$' + value.toLocaleString() 
+                        callback: function(value) {
+                            if (value >= 1000000) return '$' + (value / 1000000).toFixed(1).replace(/\.0$/, '') + ' M';
+                            if (value >= 1000) return '$' + (value / 1000).toFixed(0) + ' K';
+                            return '$' + value;
+                        }
                     } 
                 }, 
                 x: { 
@@ -241,8 +245,15 @@ document.addEventListener('DOMContentLoaded', () => {
             cutout: '70%',
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: { color: '#A0A0A0', padding: 20, font: { size: 12 } }
+                    position: window.innerWidth < 768 ? 'bottom' : 'right',
+                    align: 'center',
+                    labels: { 
+                        color: '#E0E0E0', 
+                        padding: 20, 
+                        boxWidth: 14,
+                        boxHeight: 14,
+                        font: { size: 12, family: "'Plus Jakarta Sans', sans-serif" } 
+                    }
                 }
             }
         }
@@ -250,6 +261,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchData();
 });
+
+const getVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+const categoryColorsMap = {
+    'Mobiliario': '--cat-mobiliario',
+    'Arriendo': '--cat-arriendo',
+    'Servicios': '--cat-servicios',
+    'Nomina': '--cat-nomina',
+    'Prestamos': '--cat-prestamos',
+    'Marketing': '--cat-marketing',
+    'Aderezos y Salsas': '--cat-aderezos',
+    'Carnes y Embutidos': '--cat-carnes',
+    'Frutas y Legumbres': '--cat-frutas',
+    'Panaderia y Lacteos': '--cat-panaderia-lacteos',
+    'Bebidas': '--cat-bebidas',
+    'Heladeria': '--cat-heladeria',
+    'Desechables': '--cat-desechables',
+    'Otros': '--cat-otros'
+};
 
 function populateSecondaryViews(startDate, endDate) {
     const isFiltered = startDate && endDate;
@@ -292,7 +322,7 @@ function populateSecondaryViews(startDate, endDate) {
         tipo: 'Gasto Operativo', fecha: g.Fecha || '', cat: g['Categoría'] || g.Categoria || '', desc: g['Descripción'] || g.Descripcion || '', val: g.Valor || 0
     }));
     dbData.compras.forEach(c => unifiedExpenses.push({
-        tipo: 'Compra Insumo', fecha: c.Fecha || '', cat: c.Insumo || '', desc: c.Proveedor || '', val: c['Costo Total'] || c.Valor || 0
+        tipo: 'Compra Insumo', fecha: c.Fecha || '', cat: c.Categoria || c['Categoría'] || '', desc: c.Proveedor || '', val: c['Costo Total'] || c.Valor || 0
     }));
 
     unifiedExpenses.forEach(e => {
@@ -558,7 +588,7 @@ function updateDashboard() {
         if (isKPI) {
             totalGastos += monto;
             let name = g['Descripción'] || g.Descripcion || g.Proveedor || g.Insumo || '';
-            let tipo = g.Categoria || g['Categoría'] || 'Compra Insumo';
+            let tipo = g.Categoria || g['Categoría'] || 'Otros';
             txTableHTML += `<tr><td>${gDate.toLocaleDateString()}</td><td class="fw-500">${name}</td><td><span class="dot accent"></span> ${tipo}</td><td class="text-danger fw-700">-$${monto.toLocaleString()}</td><td><span class="badge-status status-completed">Completado</span></td></tr>`;
             
             expenseCategories[tipo] = (expenseCategories[tipo] || 0) + monto;
@@ -645,8 +675,37 @@ function updateDashboard() {
     }
 
     if (window.pieChartInstance) {
-        window.pieChartInstance.data.labels = Object.keys(expenseCategories);
-        window.pieChartInstance.data.datasets[0].data = Object.values(expenseCategories);
+        const categories = Object.keys(expenseCategories);
+        const data = Object.values(expenseCategories);
+        const colors = categories.map(cat => {
+            const varName = categoryColorsMap[cat] || '--cat-otros';
+            return getVar(varName) || '#808080';
+        });
+        
+        const chartWrapper = document.getElementById('pieChart').parentElement;
+        const noDataMsg = chartWrapper.querySelector('.no-data-msg');
+        
+        if (data.length === 0 || data.every(v => v === 0)) {
+            if (!noDataMsg) {
+                const msg = document.createElement('div');
+                msg.className = 'no-data-msg';
+                msg.textContent = 'Sin gastos en este periodo';
+                msg.style.position = 'absolute';
+                msg.style.top = '50%';
+                msg.style.left = '50%';
+                msg.style.transform = 'translate(-50%, -50%)';
+                msg.style.color = 'var(--text-muted)';
+                msg.style.fontSize = '0.9rem';
+                chartWrapper.appendChild(msg);
+            }
+            window.pieChartInstance.data.labels = [];
+            window.pieChartInstance.data.datasets[0].data = [];
+        } else {
+            if (noDataMsg) noDataMsg.remove();
+            window.pieChartInstance.data.labels = categories;
+            window.pieChartInstance.data.datasets[0].data = data;
+            window.pieChartInstance.data.datasets[0].backgroundColor = colors;
+        }
         window.pieChartInstance.update();
     }
 
