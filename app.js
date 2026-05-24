@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cutout: '70%',
             plugins: {
                 legend: {
-                    position: window.innerWidth < 768 ? 'bottom' : 'right',
+                    position: 'right',
                     align: 'center',
                     labels: { 
                         color: '#E0E0E0', 
