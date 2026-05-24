@@ -1,8 +1,15 @@
-
 const API_URL = 'https://script.google.com/macros/s/AKfycbxH1PK-Tfy-Zon2OluMTCnhPs5XORiGN32nxbmm4UQ8JR_DHIbXln8vr6CGGxaZGKxKAw/exec';
 
 let dbData = { ventas: [], gastos: [], compras: [], inventario: [], menu: [] };
 let currentPeriod = 'dia';
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registrado exitosamente.'))
+      .catch(err => console.error('Error registrando SW:', err));
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const mainTitle = document.getElementById('main-title');
@@ -424,7 +431,11 @@ function fetchData() {
         })
         .catch(err => {
             console.error("Error fetching data:", err);
-            alert("No se pudo descargar la base real.");
+            alert("No se pudo descargar la base de datos. Verifica tu conexión a internet o el backend de Google Sheets.");
+        })
+        .finally(() => {
+            const loader = document.getElementById('global-loader');
+            if (loader) loader.classList.add('hidden');
         });
 }
 
