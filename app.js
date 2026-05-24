@@ -11,6 +11,24 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+let sortState = {
+    sales: { col: 'recaudado', dir: 'desc' },
+    expenses: { col: 'val', dir: 'desc' },
+    inventory: { col: 'stock', dir: 'asc' }
+};
+
+function sortDataArray(array, tableId) {
+    const state = sortState[tableId];
+    return array.sort((a, b) => {
+        let valA = a[state.col];
+        let valB = b[state.col];
+        if (typeof valA === 'string' && typeof valB === 'string') {
+            return state.dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        return state.dir === 'asc' ? valA - valB : valB - valA;
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const mainTitle = document.getElementById('main-title');
     const dateInput = document.getElementById('analysis-date');
@@ -292,7 +310,9 @@ function populateSecondaryViews(startDate, endDate) {
     const isFiltered = startDate && endDate;
     
     let salesHTML = '';
-    dbData.ventas.slice().reverse().forEach(v => {
+    let aggregatedSales = {};
+    
+    dbData.ventas.forEach(v => {
         let f = v.Fecha || v['Fecha '] || v.fecha || '';
         if(!f) return;
         
@@ -305,35 +325,48 @@ function populateSecondaryViews(startDate, endDate) {
             if (vDate < startDate || vDate > endDate) return;
         }
         
-        let dateStr = vDate.toLocaleDateString();
         let plato = v['Nombre Plato Ref'] || v['Nombre Plato'] || v.Plato || v.plato || 'Venta Registrada';
-        let cant = v['Cantidad Vendida'] || v.Cantidad || v.cantidad || 1;
-        let metodo = v['Método Pago'] || v.Pago || v.pago || 'Efectivo';
-        let dom = v.Domicilio || v.domicilio || 'NO';
+        let cant = parseInt(v['Cantidad Vendida'] || v.Cantidad || v.cantidad || 1);
         let total = Number(v['Total Venta'] || v.Total || v.total || 0);
 
+        if(!aggregatedSales[plato]) {
+            aggregatedSales[plato] = { cantidad: 0, recaudado: 0 };
+        }
+        aggregatedSales[plato].cantidad += cant;
+        aggregatedSales[plato].recaudado += total;
+    });
+
+    const salesArray = Object.keys(aggregatedSales).map(p => ({
+        plato: p,
+        cantidad: aggregatedSales[p].cantidad,
+        recaudado: aggregatedSales[p].recaudado
+    }));
+    const sortedSales = sortDataArray(salesArray, 'sales');
+
+    sortedSales.forEach(item => {
         salesHTML += `<tr>
-            <td>${dateStr}</td>
-            <td class="fw-500">${plato}</td>
-            <td>${cant}</td>
-            <td>${metodo}</td>
-            <td>${dom}</td>
-            <td class="text-success fw-700">$${total.toLocaleString()}</td>
+            <td class="fw-500">${item.plato}</td>
+            <td>${item.cantidad}</td>
+            <td class="text-success fw-700">$${item.recaudado.toLocaleString()}</td>
         </tr>`;
     });
-    document.getElementById('sales-body').innerHTML = salesHTML || '<tr><td colspan="6" class="table-empty-msg">No hay ventas para este periodo</td></tr>';
+
+    document.getElementById('sales-body').innerHTML = salesHTML || '<tr><td colspan="3" class="table-empty-msg">No hay ventas para este periodo</td></tr>';
 
     let expHTML = '';
-    let unifiedExpenses = [];
-    dbData.gastos.forEach(g => unifiedExpenses.push({
-        tipo: 'Gasto Operativo', fecha: g.Fecha || '', cat: g['Categoría'] || g.Categoria || '', desc: g['Descripción'] || g.Descripcion || '', val: g.Valor || 0
-    }));
-    dbData.compras.forEach(c => unifiedExpenses.push({
-        tipo: 'Compra Insumo', fecha: c.Fecha || '', cat: c.Categoria || c['Categoría'] || '', desc: c.Proveedor || '', val: c['Costo Total'] || c.Valor || 0
-    }));
+    let aggregatedExpenses = {};
 
-    unifiedExpenses.forEach(e => {
-        let f = e.fecha;
+    let unitsMap = {};
+    if (dbData.inventario) {
+        dbData.inventario.forEach(i => {
+            let name = i['Nombre Insumo'] || i.Nombre || i.Insumo || '';
+            let unit = i['Unidad de Medida'] || i.Unidad || i.unidad || 'u.';
+            if (name) unitsMap[name] = unit;
+        });
+    }
+
+    let processExpense = (item, isCompra) => {
+        let f = item.Fecha || item.fecha || '';
         if(!f) return;
         let parts = String(f).includes('/') ? String(f).split('/') : String(f).split('-');
         if(parts.length < 3) return;
@@ -344,34 +377,85 @@ function populateSecondaryViews(startDate, endDate) {
             if (eDate < startDate || eDate > endDate) return;
         }
 
-        const statusClass = e.tipo === 'Gasto Operativo' ? 'status-pending' : 'status-completed';
+        let cat = item.Categoria || item['Categoría'] || 'Otros';
+        let desc = isCompra ? (item.Insumo || item['Nombre Insumo Ref'] || 'Insumo') : (item['Descripción'] || item.Descripcion || 'Gasto');
+        let cant = isCompra ? parseFloat(item.Cantidad || 0) : 0;
+        let unit = isCompra ? (unitsMap[desc] || item.Unidad || item['Unidad de Medida'] || 'u.') : '---';
+        let val = Number(item['Costo Total'] || item.Valor || 0);
+
+        let key = `${cat}___${desc}`;
+        if (!aggregatedExpenses[key]) {
+            aggregatedExpenses[key] = {
+                cat: cat,
+                desc: desc,
+                cant: 0,
+                unit: unit,
+                val: 0,
+                isCompra: isCompra
+            };
+        }
+        aggregatedExpenses[key].cant += cant;
+        aggregatedExpenses[key].val += val;
+    };
+
+    dbData.gastos.forEach(g => processExpense(g, false));
+    dbData.compras.forEach(c => processExpense(c, true));
+
+    const expensesArray = Object.values(aggregatedExpenses);
+    const sortedExpenses = sortDataArray(expensesArray, 'expenses');
+
+    sortedExpenses.forEach(e => {
+        const catVar = categoryColorsMap[e.cat] || '--cat-otros';
+        const bgColor = getVar(catVar) || '#808080';
+        
+        let cantDisplay = e.isCompra ? e.cant : '---';
+        
         expHTML += `<tr>
-            <td><span class="badge-status ${statusClass}">${e.tipo}</span></td>
-            <td>${eDate.toLocaleDateString()}</td>
-            <td>${e.cat}</td>
-            <td>${e.desc}</td>
-            <td class="text-danger fw-600">$${Number(e.val).toLocaleString()}</td>
+            <td><span style="display: inline-block; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background-color: ${bgColor}; color: #fff;">${e.cat}</span></td>
+            <td class="fw-500">${e.desc}</td>
+            <td>${cantDisplay}</td>
+            <td>${e.unit}</td>
+            <td class="text-danger fw-700">-$${e.val.toLocaleString()}</td>
         </tr>`;
     });
     document.getElementById('expenses-body').innerHTML = expHTML || '<tr><td colspan="5" class="table-empty-msg">No hay gastos/compras para este periodo</td></tr>';
 
-    let invHTML = '';
+    let invArray = [];
     dbData.inventario.forEach(i => {
         let name = i['Nombre Insumo'] || i.Nombre || '';
         if(!name) return;
-        let stock = Number(i['Stock Calculado'] || i.Stock || 0);
-        let status = stock > 0 ? '<span class="badge-status status-completed">Suficiente</span>' : '<span class="badge-status status-danger">Reabastecer</span>';
+        
+        let cat = i['Categoría'] || i.Categoria || 'Otros';
+        let unit = i['Unidad Base'] || i.Unidad || 'u.';
+        let stock = Number(i['Stock_Calculado'] || i['Stock Calculado'] || i.Stock || 0);
+        let estadoStr = i['Estado'] || '';
+        
+        invArray.push({ cat, name, unit, stock, estadoStr });
+    });
+
+    const sortedInv = sortDataArray(invArray, 'inventory');
+
+    let invHTML = '';
+    sortedInv.forEach(i => {
+        const catVar = categoryColorsMap[i.cat] || '--cat-otros';
+        const bgColor = getVar(catVar) || '#808080';
+
+        let statusHtml;
+        if (i.estadoStr.toUpperCase() === 'SUFICIENTE' || i.stock > 0) {
+            statusHtml = `<span class="badge-status status-completed">${i.estadoStr || 'Suficiente'}</span>`;
+        } else {
+            statusHtml = `<span class="badge-status status-danger">${i.estadoStr || 'Reabastecer'}</span>`;
+        }
+
         invHTML += `<tr>
-            <td>${i['ID_Insumo'] || i.ID || ''}</td>
-            <td class="fw-600">${name}</td>
-            <td>${i['Inventario Inicial'] || 0}</td>
-            <td>${i['Cantidad Comprada'] || 0}</td>
-            <td>${i['Disponible para Uso'] || 0}</td>
-            <td class="fw-700">${stock}</td>
-            <td>${status}</td>
+            <td><span style="display: inline-block; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background-color: ${bgColor}; color: #fff;">${i.cat}</span></td>
+            <td class="fw-600">${i.name}</td>
+            <td>${i.unit}</td>
+            <td class="fw-700">${i.stock}</td>
+            <td>${statusHtml}</td>
         </tr>`;
     });
-    document.getElementById('inventory-body').innerHTML = invHTML || '<tr><td colspan="7" class="table-empty-msg">Sin datos de inventario</td></tr>';
+    document.getElementById('inventory-body').innerHTML = invHTML || '<tr><td colspan="5" class="table-empty-msg">Sin datos de inventario</td></tr>';
 }
 
 function populateMenu() {
@@ -534,7 +618,7 @@ function updateDashboard() {
     let prevTotalGastos = 0;
     let numVentas = 0;
     let prevNumVentas = 0;
-    let txTableHTML = '';
+    let platosVendidos = {};
     let expenseCategories = {};
 
     dbData.ventas.forEach(v => {
@@ -556,7 +640,9 @@ function updateDashboard() {
         if (isKPI) {
             totalVentas += monto;
             numVentas += 1;
-            txTableHTML += `<tr><td>${vDate.toLocaleDateString()}</td><td class="fw-500">${v['Nombre Plato Ref'] || v.Plato || ''}</td><td><span class="dot primary"></span> Venta</td><td class="text-success fw-700">+$${monto.toLocaleString()}</td><td><span class="badge-status status-completed">Completado</span></td></tr>`;
+            let plato = v['Nombre Plato Ref'] || v.Plato || 'Desconocido';
+            let cantidad = parseInt(v.Cantidad || v['Cantidad '] || 1);
+            platosVendidos[plato] = (platosVendidos[plato] || 0) + cantidad;
         }
 
         if (vDate >= prevStartDate && vDate <= prevEndDate) {
@@ -600,7 +686,6 @@ function updateDashboard() {
             totalGastos += monto;
             let name = g['Descripción'] || g.Descripcion || g.Proveedor || g.Insumo || '';
             let tipo = g.Categoria || g['Categoría'] || 'Otros';
-            txTableHTML += `<tr><td>${gDate.toLocaleDateString()}</td><td class="fw-500">${name}</td><td><span class="dot accent"></span> ${tipo}</td><td class="text-danger fw-700">-$${monto.toLocaleString()}</td><td><span class="badge-status status-completed">Completado</span></td></tr>`;
             
             expenseCategories[tipo] = (expenseCategories[tipo] || 0) + monto;
         }
@@ -625,11 +710,10 @@ function updateDashboard() {
     });
 
     const kpiValues = document.querySelectorAll('.kpi-card .value');
-    if(kpiValues.length >= 4) {
+    if(kpiValues.length >= 3) {
         kpiValues[0].textContent = '$' + totalVentas.toLocaleString();
         kpiValues[1].textContent = '$' + totalGastos.toLocaleString();
         kpiValues[2].textContent = '$' + (totalVentas - totalGastos).toLocaleString();
-        kpiValues[3].textContent = numVentas > 0 ? '$' + Math.round(totalVentas / numVentas).toLocaleString() : '$0';
     }
 
     const updateTrend = (index, current, previous) => {
@@ -667,11 +751,28 @@ function updateDashboard() {
     updateTrend(0, totalVentas, prevTotalVentas);
     updateTrend(1, totalGastos, prevTotalGastos);
     updateTrend(2, totalVentas - totalGastos, prevTotalVentas - prevTotalGastos);
-    updateTrend(3, numVentas > 0 ? totalVentas / numVentas : 0, prevNumVentas > 0 ? prevTotalVentas / prevNumVentas : 0);
+
+    // Renderizar Top 3 Ventas
+    const topVentasList = document.getElementById('top-ventas-list');
+    if (topVentasList) {
+        const sortedPlatos = Object.keys(platosVendidos)
+            .map(plato => ({ plato, cantidad: platosVendidos[plato] }))
+            .sort((a, b) => b.cantidad - a.cantidad)
+            .slice(0, 3);
+            
+        if (sortedPlatos.length === 0) {
+            topVentasList.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted);">No hay ventas</p>';
+        } else {
+            topVentasList.innerHTML = sortedPlatos.map(item => `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-hover); padding: 0.4rem 0.6rem; border-radius: var(--radius-sm);">
+                    <span style="font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;">${item.plato}</span>
+                    <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">${item.cantidad} u.</span>
+                </div>
+            `).join('');
+        }
+    }
 
     lucide.createIcons();
-
-    document.getElementById('transactions-body').innerHTML = txTableHTML || '<tr><td colspan="5" class="table-empty-msg">No hay registros para este periodo.</td></tr>';
 
     if (window.mainChartInstance) {
         window.mainChartInstance.data.labels = labels;
@@ -722,3 +823,34 @@ function updateDashboard() {
 
     populateSecondaryViews(startDate, endDate);
 }
+
+    function setupSorting() {
+        document.querySelectorAll('.sortable-header').forEach(th => {
+            th.addEventListener('click', () => {
+                const table = th.dataset.table;
+                const col = th.dataset.sort;
+                
+                if (sortState[table].col === col) {
+                    sortState[table].dir = sortState[table].dir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortState[table].col = col;
+                    sortState[table].dir = 'asc';
+                }
+                
+                document.querySelectorAll(`.sortable-header[data-table="${table}"] .sort-icon`).forEach(icon => {
+                    icon.innerHTML = '<i data-lucide="arrow-up-down"></i>';
+                    icon.classList.remove('active');
+                });
+                const newIcon = sortState[table].dir === 'asc' ? 'arrow-up' : 'arrow-down';
+                const iconSpan = th.querySelector('.sort-icon');
+                iconSpan.innerHTML = `<i data-lucide="${newIcon}"></i>`;
+                iconSpan.classList.add('active');
+                lucide.createIcons();
+                
+                const activeBtn = document.querySelector('.period-selector .active');
+                updateDashboard(activeBtn ? activeBtn.dataset.period : 'mes');
+            });
+        });
+    }
+
+    setupSorting();

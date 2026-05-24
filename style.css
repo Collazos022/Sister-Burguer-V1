@@ -494,6 +494,7 @@ body {
 .chart-wrapper {
     height: 300px;
     position: relative;
+    width: 100%;
 }
 
 .recent-activity {
@@ -863,7 +864,8 @@ body {
     .period-selector button { flex: 1; padding: 0.35rem 0.1rem; font-size: 0.75rem; background: var(--bg-hover); margin: 0 2px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
     .period-selector button.active { background: var(--primary); border-color: var(--primary); }
     .kpi-grid, .charts-row, .tables-row { grid-template-columns: 1fr; }
-    .chart-card.small .chart-wrapper { height: 300px; }
+    .chart-card { padding: 1rem 0.5rem; width: 100%; overflow: hidden; }
+    .chart-card.small .chart-wrapper { height: 300px; width: 100%; }
     .chart-legend { position: relative; bottom: 0; padding-top: 20px; justify-content: center; flex-wrap: wrap; }
 }
 
@@ -898,4 +900,28 @@ body {
 .global-loader p {
     color: var(--text-muted);
     font-weight: 600;
+}
+
+/* Sortable Headers */
+.sortable-header {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+.sortable-header:hover {
+    background-color: var(--bg-hover);
+}
+.sort-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.3rem;
+    color: var(--border-light);
+    vertical-align: middle;
+}
+.sort-icon svg {
+    width: 14px;
+    height: 14px;
+}
+.sort-icon.active {
+    color: var(--primary);
 }

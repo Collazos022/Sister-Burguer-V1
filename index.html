@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.3">
+    <link rel="stylesheet" href="style.css?v=2.3.4">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -157,18 +157,10 @@
 
                         <div class="kpi-card">
                             <div class="kpi-header">
-                                <span class="label">Venta Promedio</span>
-                                <div class="trend neutral">
-                                    <i data-lucide="minus"></i>
-                                    <span>0%</span>
-                                </div>
+                                <span class="label">Top 3 de Ventas</span>
                             </div>
-                            <div class="kpi-body">
-                                <h2 class="value">$35,000</h2>
-                                <p class="sub-label">Por pedido</p>
-                            </div>
-                            <div class="kpi-progress">
-                                <div class="progress-bar info" style="width: 55%;"></div>
+                            <div class="kpi-body" id="top-ventas-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                                <p style="font-size: 0.85rem; color: var(--text-muted);">Calculando...</p>
                             </div>
                         </div>
                     </div>
@@ -196,28 +188,7 @@
                         </div>
                     </div>
 
-                    <div class="recent-activity">
-                        <div class="card-header">
-                            <h3>Últimos Movimientos</h3>
-                            <button class="btn-text">Ver todo</button>
-                        </div>
-                        <div class="table-wrapper">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Descripción</th>
-                                        <th>Categoría</th>
-                                        <th>Monto</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="transactions-body">
 
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 </section>
 
                 <section class="dashboard-view" id="sales" style="display: none;">
@@ -226,12 +197,9 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>Fecha</th>
-                                        <th>Plato</th>
-                                        <th>Cant.</th>
-                                        <th>Método</th>
-                                        <th>Domicilio</th>
-                                        <th>Total</th>
+                                        <th class="sortable-header" data-table="sales" data-sort="plato">Plato <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="sales" data-sort="cantidad">Cantidad Total <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="sales" data-sort="recaudado">Total Recaudado <span class="sort-icon active"><i data-lucide="arrow-down"></i></span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="sales-body"></tbody>
@@ -246,11 +214,11 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>Tipo</th>
-                                        <th>Fecha</th>
-                                        <th>Categoría/Insumo</th>
-                                        <th>Descripción/Proveedor</th>
-                                        <th>Valor</th>
+                                        <th class="sortable-header" data-table="expenses" data-sort="cat">Categoría <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="expenses" data-sort="desc">Descripción/Insumo <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="expenses" data-sort="cant">Cantidad <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="expenses" data-sort="unit">Unidades <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="expenses" data-sort="val">Valor <span class="sort-icon active"><i data-lucide="arrow-down"></i></span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="expenses-body"></tbody>
@@ -265,13 +233,11 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>ID Insumo</th>
-                                        <th>Nombre</th>
-                                        <th>Inventario Inicial</th>
-                                        <th>Cantidad Comprada</th>
-                                        <th>Disponible para Uso</th>
-                                        <th>Stock Calculado</th>
-                                        <th>Estado</th>
+                                        <th class="sortable-header" data-table="inventory" data-sort="cat">Categoría <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="inventory" data-sort="name">Nombre Insumo <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="inventory" data-sort="unit">Unidad Base <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="inventory" data-sort="stock">Stock Calculado <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
+                                        <th class="sortable-header" data-table="inventory" data-sort="estadoStr">Estado <span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="inventory-body"></tbody>
@@ -416,7 +382,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=2.3"></script>
+    <script src="app.js?v=2.3.4"></script>
 </body>
 
 </html>
