@@ -1,12 +1,5 @@
-# API de Google Sheets para Sister Burguer
-
-Aquí está la **Versión 5** del backend, que incluye soporte para la nueva pestaña `PEDIDOS_ACTIVOS` y el ciclo de vida de los pedidos (Creado -> Preparado -> Entregado).
-
-Ve a tu Google Sheet, entra a **Extensiones > Apps Script**, reemplaza el código anterior por este y publícalo como **Aplicación Web** (asegurándote de generar una **Nueva Versión** al desplegar).
-
-```javascript
 /**
- * Sister Burguer - API Backend v5 (POS y Cocina Integrados)
+ * Sister Burguer - API Backend v7 (POS y Cocina Integrados)
  */
 
 function doGet(e) {
@@ -211,4 +204,3 @@ function doOptions(e) {
       "Access-Control-Max-Age": "86400"
     });
 }
-```

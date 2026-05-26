@@ -58,11 +58,27 @@ document.addEventListener('DOMContentLoaded', () => {
             navItems.forEach(n => n.classList.toggle('active', n === item));
             views.forEach(v => v.style.display = v.id === tabId ? 'block' : 'none');
             
+            const periodFilters = document.getElementById('period-filters');
+            const dateControls = document.querySelector('.date-controls');
+            const posOrderWrapper = document.getElementById('pos-order-wrapper');
+            
+            if (tabId === 'pos' || tabId === 'cocina') {
+                if(periodFilters) periodFilters.style.display = 'none';
+                if(dateControls) dateControls.style.display = 'none';
+                if(posOrderWrapper) posOrderWrapper.style.display = 'flex';
+            } else {
+                if(periodFilters) periodFilters.style.display = 'flex';
+                if(dateControls) dateControls.style.display = 'flex';
+                if(posOrderWrapper) posOrderWrapper.style.display = 'none';
+            }
+            
             const titles = {
                 'dashboard': 'Resumen Financiero',
                 'sales': 'Historial de Ventas',
                 'expenses': 'Gastos y Compras',
-                'inventory': 'Alerta de Inventario'
+                'inventory': 'Alerta de Inventario',
+                'pos': 'Punto de Venta',
+                'cocina': 'Órdenes Activas'
             };
             mainTitle.textContent = titles[tabId] || 'Panel Administrativo';
         });
@@ -111,22 +127,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const formCompra = document.getElementById('form-compra');
 
     const toggleFormType = () => {
-        formVenta.style.display = 'none';
-        formGasto.style.display = 'none';
-        formCompra.style.display = 'none';
-        setRequired(formVenta, false);
-        setRequired(formGasto, false);
-        setRequired(formCompra, false);
+        if(formVenta) formVenta.style.display = 'none';
+        if(formGasto) formGasto.style.display = 'none';
+        if(formCompra) formCompra.style.display = 'none';
+        if(formVenta) setRequired(formVenta, false);
+        if(formGasto) setRequired(formGasto, false);
+        if(formCompra) setRequired(formCompra, false);
 
-        if (radioVenta.checked) {
-            formVenta.style.display = 'block';
-            setRequired(formVenta, true);
-        } else if (radioGasto.checked) {
-            formGasto.style.display = 'block';
-            setRequired(formGasto, true);
-        } else if (radioCompra.checked) {
-            formCompra.style.display = 'block';
-            setRequired(formCompra, true);
+        if (radioVenta && radioVenta.checked) {
+            if(formVenta) {
+                formVenta.style.display = 'block';
+                setRequired(formVenta, true);
+            }
+        } else if (radioGasto && radioGasto.checked) {
+            if(formGasto) {
+                formGasto.style.display = 'block';
+                setRequired(formGasto, true);
+            }
+        } else if (radioCompra && radioCompra.checked) {
+            if(formCompra) {
+                formCompra.style.display = 'block';
+                setRequired(formCompra, true);
+            }
         }
     };
 
@@ -135,9 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
         inputs.forEach(input => input.required = isRequired);
     }
 
-    radioVenta.addEventListener('change', toggleFormType);
-    radioGasto.addEventListener('change', toggleFormType);
-    radioCompra.addEventListener('change', toggleFormType);
+    if(radioVenta) radioVenta.addEventListener('change', toggleFormType);
+    if(radioGasto) radioGasto.addEventListener('change', toggleFormType);
+    if(radioCompra) radioCompra.addEventListener('change', toggleFormType);
     toggleFormType();
     
     const periodButtons = document.querySelectorAll('#period-filters button');
@@ -411,7 +433,7 @@ function populateSecondaryViews(startDate, endDate) {
         let cantDisplay = e.isCompra ? e.cant : '---';
         
         expHTML += `<tr>
-            <td><span style="display: inline-block; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background-color: ${bgColor}; color: #fff;">${e.cat}</span></td>
+            <td><span class="table-cat-badge" style="background-color: ${bgColor};">${e.cat}</span></td>
             <td class="fw-500">${e.desc}</td>
             <td>${cantDisplay}</td>
             <td>${e.unit}</td>
@@ -448,7 +470,7 @@ function populateSecondaryViews(startDate, endDate) {
         }
 
         invHTML += `<tr>
-            <td><span style="display: inline-block; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background-color: ${bgColor}; color: #fff;">${i.cat}</span></td>
+            <td><span class="table-cat-badge" style="background-color: ${bgColor};">${i.cat}</span></td>
             <td class="fw-600">${i.name}</td>
             <td>${i.unit}</td>
             <td class="fw-700">${i.stock}</td>
@@ -460,6 +482,7 @@ function populateSecondaryViews(startDate, endDate) {
 
 function populateMenu() {
     const select = document.getElementById('v-plato');
+    if (!select) return; // Sale form was removed
     select.innerHTML = '<option value="">-- Selecciona un plato --</option>';
     
     dbData.menu.forEach(item => {
@@ -502,6 +525,22 @@ function fetchData() {
                 dbData.compras = data.compras || [];
                 dbData.inventario = data.inventario || [];
                 dbData.menu = data.menu || [];
+                
+                if (data.pedidos && Array.isArray(data.pedidos)) {
+                    pedidosActivos = data.pedidos
+                        .filter(p => !p.Estado || p.Estado !== 'entregado')
+                        .map(p => ({
+                            id: Number(p.ID_Pedido || p["ID Pedido"] || Object.values(p)[1]),
+                            destino: p.Destino || '',
+                            cliente: p.Cliente || p["Nombre Cliente"] || '',
+                            items: p.Detalle_JSON ? JSON.parse(p.Detalle_JSON) : [],
+                            estado: p.Estado || 'pendiente',
+                            pago: p.Pago || 'Efectivo'
+                        }));
+                    savePedidos();
+                    if(typeof renderKDS === 'function') renderKDS();
+                    if(typeof renderOrderBar === 'function') renderOrderBar();
+                }
                 
                 populateMenu();
                 try {
@@ -761,12 +800,12 @@ function updateDashboard() {
             .slice(0, 3);
             
         if (sortedPlatos.length === 0) {
-            topVentasList.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted);">No hay ventas</p>';
+            topVentasList.innerHTML = '<p class="empty-text-state">No hay ventas</p>';
         } else {
             topVentasList.innerHTML = sortedPlatos.map(item => `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-hover); padding: 0.4rem 0.6rem; border-radius: var(--radius-sm);">
-                    <span style="font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;">${item.plato}</span>
-                    <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">${item.cantidad} u.</span>
+                <div class="top-sale-item">
+                    <span class="top-sale-name">${item.plato}</span>
+                    <span class="top-sale-qty">${item.cantidad} u.</span>
                 </div>
             `).join('');
         }
@@ -854,3 +893,624 @@ function updateDashboard() {
     }
 
     setupSorting();
+
+// --- ROL Y VISTAS ---
+document.addEventListener('DOMContentLoaded', () => {
+    const roleSelector = document.getElementById('role-selector');
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    function updateRoles() {
+        const role = roleSelector.value;
+        let firstVisibleTab = null;
+        
+        const profileIcon = document.getElementById('profile-icon');
+        if (profileIcon) {
+            if (role === 'admin') profileIcon.style.color = 'var(--primary)';
+            else if (role === 'servicio') profileIcon.style.color = 'var(--accent)';
+            else if (role === 'cocina') profileIcon.style.color = 'var(--success)';
+        }
+        
+        navItems.forEach(item => {
+            const roles = item.getAttribute('data-roles');
+            if (roles && !roles.split(',').includes(role)) {
+                item.style.display = 'none';
+            } else {
+                item.style.display = 'flex';
+                if (!firstVisibleTab && item.getAttribute('data-tab')) {
+                    firstVisibleTab = item;
+                }
+            }
+        });
+        
+        const currentActive = document.querySelector('.nav-item.active');
+        if (currentActive && currentActive.style.display === 'none' && firstVisibleTab) {
+            firstVisibleTab.click();
+        } else if (!currentActive && firstVisibleTab) {
+            firstVisibleTab.click();
+        }
+    }
+    
+    if(roleSelector) {
+        roleSelector.addEventListener('change', updateRoles);
+        updateRoles();
+    }
+});
+
+let posCart = [];
+let pedidosActivos = JSON.parse(localStorage.getItem('pedidosActivos')) || [];
+let posActiveOrderId = null; // Track if we are editing an existing order
+
+function savePedidos() {
+    localStorage.setItem('pedidosActivos', JSON.stringify(pedidosActivos));
+    renderKDS();
+    renderOrderBar();
+}
+
+function renderOrderBar() {
+    const bar = document.getElementById('pos-order-bar');
+    if (!bar) return;
+    
+    const currentScroll = bar.scrollLeft;
+    
+    const pendientes = pedidosActivos.filter(p => p.estado !== 'entregado');
+    if (pendientes.length === 0) {
+        bar.innerHTML = '<span class="empty-text-state">Sin órdenes activas</span>';
+        updateOrderScrollArrows();
+        return;
+    }
+    
+    let html = '';
+    pendientes.forEach(pedido => {
+        let className = 'order-pill';
+        if (pedido.estado === 'preparado') className += ' preparado';
+        else className += ' pendiente';
+        
+        if (pedido.id === posActiveOrderId) className += ' selected-pill';
+        
+        html += `
+            <div class="${className}" data-id="${pedido.id}">
+                ${pedido.destino} ${pedido.cliente ? '- ' + pedido.cliente : ''}
+                ${pedido.estado === 'preparado' ? '<i data-lucide="check-circle" class="icon-small"></i>' : ''}
+            </div>
+        `;
+    });
+    bar.innerHTML = html;
+    bar.scrollLeft = currentScroll;
+    
+    lucide.createIcons();
+    
+    // Add click listeners to load order into POS
+    bar.querySelectorAll('.order-pill').forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            const id = Number(e.currentTarget.getAttribute('data-id'));
+            loadOrderIntoPOS(id);
+        });
+    });
+    
+    updateOrderScrollArrows();
+}
+
+function updateOrderScrollArrows() {
+    const bar = document.getElementById('pos-order-bar');
+    const leftArrow = document.getElementById('scroll-left');
+    const rightArrow = document.getElementById('scroll-right');
+    if(!bar || !leftArrow || !rightArrow) return;
+    
+    if (bar.scrollWidth > bar.clientWidth) {
+        leftArrow.style.display = bar.scrollLeft > 0 ? 'flex' : 'none';
+        rightArrow.style.display = bar.scrollLeft < (bar.scrollWidth - bar.clientWidth - 1) ? 'flex' : 'none';
+    } else {
+        leftArrow.style.display = 'none';
+        rightArrow.style.display = 'none';
+    }
+}
+
+function loadOrderIntoPOS(id) {
+    const pedido = pedidosActivos.find(p => p.id === id);
+    if (!pedido) return;
+    
+    const roleSelector = document.getElementById('role-selector');
+    if (roleSelector && roleSelector.value === 'cocina') {
+        // If the kitchen clicks the pill, maybe do nothing or show details? Just do nothing for now.
+        return;
+    }
+    
+    posActiveOrderId = id;
+    
+    // Switch to POS tab if not there
+    const posTab = document.querySelector('.nav-item[data-tab="pos"]');
+    if (posTab && !posTab.classList.contains('active')) posTab.click();
+    
+    // Populate form
+    const posDestino = document.getElementById('pos-destino');
+    const posNombre = document.getElementById('pos-nombre');
+    
+    if (posDestino) posDestino.value = pedido.destino;
+    if (posNombre) {
+        if (pedido.destino.startsWith('Domicilio')) {
+            posNombre.style.display = 'block';
+            posNombre.value = pedido.cliente || '';
+        } else {
+            posNombre.style.display = 'none';
+            posNombre.value = '';
+        }
+    }
+    
+    const radioPago = document.querySelector(`input[name="pos-pago"][value="${pedido.pago}"]`);
+    if (radioPago) radioPago.checked = true;
+    
+    posCart = JSON.parse(JSON.stringify(pedido.items)); // Deep copy
+    renderCart();
+    updatePOSButtons();
+    renderOrderBar(); // Trigger UI update for the active pill
+}
+
+function updatePOSButtons() {
+    const btnCrear = document.getElementById('btn-pos-crear');
+    const btnEditar = document.getElementById('btn-pos-editar');
+    const btnEntregar = document.getElementById('btn-pos-entregar');
+    const btnLimpiar = document.getElementById('btn-pos-limpiar');
+    
+    const posDestino = document.getElementById('pos-destino');
+    const btnAddCart = document.getElementById('btn-add-cart');
+    const paymentRadios = document.querySelectorAll('input[name="pos-pago"]');
+    
+    const isDestinoSelected = posDestino && posDestino.value !== "";
+    const hasItems = posCart && posCart.length > 0;
+    const hasPayment = document.querySelector('input[name="pos-pago"]:checked') !== null;
+    
+    if (btnAddCart) btnAddCart.disabled = !isDestinoSelected;
+    paymentRadios.forEach(r => r.disabled = !hasItems);
+    
+    if (posActiveOrderId) {
+        if (btnCrear) btnCrear.style.display = 'none';
+        
+        const pedido = pedidosActivos.find(p => p.id === posActiveOrderId);
+        const estado = pedido ? pedido.estado : 'pendiente';
+        
+        if (btnLimpiar) {
+            btnLimpiar.textContent = 'Atrás';
+            btnLimpiar.style.display = 'block';
+        }
+        
+        if (estado === 'preparado') {
+            if (btnEditar) { btnEditar.style.display = 'block'; btnEditar.disabled = false; }
+            if (btnEntregar) { btnEntregar.style.display = 'block'; btnEntregar.disabled = false; }
+        } else {
+            if (btnEditar) { btnEditar.style.display = 'block'; btnEditar.disabled = false; }
+            if (btnEntregar) { btnEntregar.style.display = 'none'; }
+        }
+    } else {
+        if (btnCrear) {
+            btnCrear.style.display = 'block';
+            btnCrear.disabled = !(isDestinoSelected && hasItems && hasPayment);
+        }
+        if (btnEditar) btnEditar.style.display = 'none';
+        if (btnEntregar) btnEntregar.style.display = 'none';
+        
+        if (btnLimpiar) {
+            btnLimpiar.textContent = 'Limpiar';
+            btnLimpiar.style.display = 'block';
+        }
+    }
+}
+
+function resetPOS() {
+    posActiveOrderId = null;
+    posCart = [];
+    const posNombre = document.getElementById('pos-nombre');
+    if(posNombre) posNombre.value = '';
+    renderCart();
+    updatePOSButtons();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const posDestino = document.getElementById('pos-destino');
+    const posNombre = document.getElementById('pos-nombre');
+    const posPlato = document.getElementById('pos-plato');
+    const posNotas = document.getElementById('pos-notas');
+    const btnAddCart = document.getElementById('btn-add-cart');
+    const cartContainer = document.getElementById('cart-items');
+    const posTotalPrice = document.getElementById('pos-total-price');
+    const btnPosCrear = document.getElementById('btn-pos-crear');
+    const btnPosEditar = document.getElementById('btn-pos-editar');
+    const btnPosEntregar = document.getElementById('btn-pos-entregar');
+    
+    updatePOSButtons();
+
+    if (posDestino) {
+        posDestino.addEventListener('change', () => {
+            if (posDestino.value.startsWith('Domicilio')) {
+                posNombre.style.display = 'block';
+            } else {
+                posNombre.style.display = 'none';
+            }
+            updatePOSButtons();
+        });
+    }
+    
+    document.querySelectorAll('input[name="pos-pago"]').forEach(r => {
+        r.addEventListener('change', updatePOSButtons);
+    });
+
+    const observer = new MutationObserver(() => {
+        if(dbData && dbData.menu && dbData.menu.length > 0 && posPlato && posPlato.options.length <= 1) {
+            dbData.menu.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.nombre;
+                opt.textContent = `${item.nombre} ($${Number(item.precio).toLocaleString()})`;
+                opt.dataset.precio = item.precio;
+                posPlato.appendChild(opt);
+            });
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    function renderCart_local() {
+        if (posCart.length === 0) {
+            if (cartContainer) cartContainer.innerHTML = '<p class="empty-text-state">El carrito está vacío</p>';
+            if (posTotalPrice) posTotalPrice.textContent = '$0';
+            if (!posActiveOrderId) {
+                if (btnPosCrear) btnPosCrear.disabled = true;
+            }
+            return;
+        }
+        
+        if (!posActiveOrderId && btnPosCrear) btnPosCrear.disabled = false;
+        
+        let html = '';
+        let total = 0;
+        posCart.forEach((item, index) => {
+            total += item.precio * item.cantidad;
+            html += `
+                <div class="cart-item-row">
+                    <div class="cart-item-info">
+                        <h4 class="cart-item-title">${item.nombre} x${item.cantidad}</h4>
+                        <p class="cart-item-note">${item.notas}</p>
+                    </div>
+                    <div class="cart-item-price">
+                        $${(item.precio * item.cantidad).toLocaleString()}
+                    </div>
+                    <button class="btn-remove-item cart-btn-remove" data-index="${index}"><i data-lucide="trash-2"></i></button>
+                </div>
+            `;
+        });
+        if (cartContainer) cartContainer.innerHTML = html;
+        if (posTotalPrice) posTotalPrice.textContent = '$' + total.toLocaleString();
+        lucide.createIcons();
+        
+        document.querySelectorAll('.btn-remove-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = e.currentTarget.getAttribute('data-index');
+                posCart.splice(idx, 1);
+                renderCart_local();
+            });
+        });
+        
+        updatePOSButtons();
+    }
+
+    // Expose global for the specific load logic
+    window.renderCart = renderCart_local;
+
+    if (btnAddCart) {
+        btnAddCart.addEventListener('click', () => {
+            const selectedOpt = posPlato.options[posPlato.selectedIndex];
+            if (!selectedOpt || !selectedOpt.value) return alert("Selecciona un plato");
+            
+            const item = {
+                nombre: selectedOpt.value,
+                precio: Number(selectedOpt.dataset.precio),
+                cantidad: 1, 
+                notas: posNotas.value || '',
+                plato: selectedOpt.value,
+                total: Number(selectedOpt.dataset.precio)
+            };
+            
+            // Si ya existe el plato con misma nota, sumamos
+            const exists = posCart.find(i => i.nombre === item.nombre && i.notas === item.notas);
+            if(exists) exists.cantidad += 1;
+            else posCart.push(item);
+            
+            posNotas.value = '';
+            posPlato.value = '';
+            renderCart_local();
+        });
+    }
+
+    if (btnPosCrear) {
+        btnPosCrear.addEventListener('click', () => {
+            if(posCart.length === 0) return;
+            
+            const destino = posDestino.value;
+            const cliente = destino.startsWith('Domicilio') ? posNombre.value : '';
+            const metodoPago = document.querySelector('input[name="pos-pago"]:checked').value;
+            
+            let totalPedido = posCart.reduce((sum, i) => sum + (i.precio * i.cantidad), 0);
+            if (destino.startsWith('Domicilio')) totalPedido += 1000;
+
+            const nuevoPedido = {
+                id: Date.now(),
+                destino: destino,
+                cliente: cliente,
+                pago: metodoPago,
+                items: [...posCart],
+                estado: 'pendiente', 
+                fecha: new Date().toISOString()
+            };
+            
+            const payload = {
+                type: 'order',
+                id_pedido: nuevoPedido.id,
+                fecha: nuevoPedido.fecha.split('T')[0],
+                destino: destino,
+                nombre_cliente: cliente,
+                metodo_pago: metodoPago,
+                total: totalPedido,
+                detalle_json: JSON.stringify(nuevoPedido.items)
+            };
+
+            const originalText = btnPosCrear.innerHTML;
+            btnPosCrear.innerHTML = 'Enviando...';
+            btnPosCrear.disabled = true;
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    pedidosActivos.push(nuevoPedido);
+                    savePedidos();
+                    resetPOS();
+                    alert("Pedido creado y enviado a la cocina.");
+                    if(typeof fetchData === 'function') fetchData();
+                } else {
+                    alert("Error en backend: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                pedidosActivos.push(nuevoPedido);
+                savePedidos();
+                resetPOS();
+                alert("Sin conexión, pedido guardado solo localmente.");
+            })
+            .finally(() => {
+                btnPosCrear.innerHTML = originalText;
+                btnPosCrear.disabled = false;
+            });
+        });
+    }
+
+    if (btnPosEditar) {
+        btnPosEditar.addEventListener('click', () => {
+            if (!posActiveOrderId) return;
+            
+            const index = pedidosActivos.findIndex(p => p.id === posActiveOrderId);
+            if(index > -1) {
+                const destino = posDestino.value;
+                const cliente = destino.startsWith('Domicilio') ? posNombre.value : '';
+                const metodoPago = document.querySelector('input[name="pos-pago"]:checked').value;
+                
+                let totalPedido = posCart.reduce((sum, i) => sum + (i.precio * i.cantidad), 0);
+                if (destino.startsWith('Domicilio')) totalPedido += 1000;
+
+                const payload = {
+                    type: 'update_order_full',
+                    id_pedido: pedidosActivos[index].id,
+                    total: totalPedido,
+                    detalle_json: JSON.stringify(posCart)
+                };
+
+                const originalText = btnPosEditar.innerHTML;
+                btnPosEditar.innerHTML = 'Modificando...';
+                btnPosEditar.disabled = true;
+
+                fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        pedidosActivos[index].destino = destino;
+                        pedidosActivos[index].cliente = cliente;
+                        pedidosActivos[index].pago = metodoPago;
+                        pedidosActivos[index].items = [...posCart];
+                        pedidosActivos[index].estado = 'pendiente';
+                        
+                        savePedidos();
+                        resetPOS();
+                        alert("Pedido modificado y enviado de vuelta a la cocina.");
+                    } else {
+                        alert("Error en backend: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Sin conexión para modificar pedido en la base de datos.");
+                })
+                .finally(() => {
+                    btnPosEditar.innerHTML = originalText;
+                    btnPosEditar.disabled = false;
+                });
+            }
+        });
+    }
+
+    if (btnPosEntregar) {
+        btnPosEntregar.addEventListener('click', () => {
+            if (!posActiveOrderId) return;
+            
+            const index = pedidosActivos.findIndex(p => p.id === posActiveOrderId);
+            if(index > -1) {
+                const pedido = pedidosActivos[index];
+                let totalPedido = pedido.items.reduce((sum, i) => sum + (i.precio * i.cantidad), 0);
+                if (pedido.destino.startsWith('Domicilio')) totalPedido += 1000;
+
+                const originalText = btnPosEntregar.innerHTML;
+                btnPosEntregar.innerHTML = 'Enviando...';
+                btnPosEntregar.disabled = true;
+
+                const payload = {
+                    type: 'complete_order',
+                    id_pedido: pedido.id,
+                    fecha: new Date().toISOString().split('T')[0],
+                    destino: pedido.destino,
+                    metodo_pago: pedido.pago,
+                    total: totalPedido,
+                    detalle_json: JSON.stringify(pedido.items)
+                };
+
+                fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        pedidosActivos[index].estado = 'entregado';
+                        savePedidos();
+                        resetPOS();
+                        alert("Pedido entregado y registrado en Ventas.");
+                        if(typeof fetchData === 'function') fetchData(); // Sync con backend
+                    } else {
+                        alert("Error al entregar: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Error de conexión al marcar como entregado.");
+                })
+                .finally(() => {
+                    btnPosEntregar.innerHTML = originalText;
+                    btnPosEntregar.disabled = false;
+                });
+            }
+        });
+    }
+    
+    const btnPosLimpiar = document.getElementById('btn-pos-limpiar');
+    if (btnPosLimpiar) {
+        btnPosLimpiar.addEventListener('click', resetPOS);
+    }
+
+    if(cartContainer) renderCart_local();
+    
+    window.addEventListener('storage', (e) => {
+        if(e.key === 'pedidosActivos') {
+            pedidosActivos = JSON.parse(e.newValue) || [];
+            renderKDS();
+            renderOrderBar();
+        }
+    });
+
+    renderKDS();
+    renderOrderBar();
+    
+    // Attach scroll arrow listeners
+    document.getElementById('scroll-left')?.addEventListener('click', () => {
+        const bar = document.getElementById('pos-order-bar');
+        if(bar) bar.scrollBy({ left: -200, behavior: 'smooth' });
+    });
+    document.getElementById('scroll-right')?.addEventListener('click', () => {
+        const bar = document.getElementById('pos-order-bar');
+        if(bar) bar.scrollBy({ left: 200, behavior: 'smooth' });
+    });
+    document.getElementById('pos-order-bar')?.addEventListener('scroll', updateOrderScrollArrows);
+});
+
+function renderKDS() {
+    const kdsGrid = document.getElementById('kds-grid');
+    if(!kdsGrid) return;
+    
+    const pendientes = pedidosActivos.filter(p => p.estado !== 'entregado');
+    
+    if(pendientes.length === 0) {
+        kdsGrid.innerHTML = '<p class="empty-text-kds">No hay pedidos en cocina</p>';
+        return;
+    }
+    
+    let html = '';
+    pendientes.forEach(pedido => {
+        let itemsHtml = pedido.items.map(item => `
+            <li class="kds-ticket-item">
+                <div class="kds-ticket-item-qty">${item.cantidad}x ${item.nombre}</div>
+                ${item.notas ? `<div class="kds-ticket-item-note">Nota: ${item.notas}</div>` : ''}
+            </li>
+        `).join('');
+        
+        let title = pedido.destino.startsWith('Domicilio') ? `Dom: ${pedido.cliente || 'Sin Nombre'}` : pedido.destino;
+        
+        const isPreparado = pedido.estado === 'preparado';
+        
+        html += `
+            <div class="kds-ticket ${isPreparado ? 'preparado' : ''}">
+                <div class="kds-ticket-header">
+                    <h3 class="kds-ticket-title">${title}</h3>
+                    <span class="kds-ticket-time">${new Date(pedido.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+                <ul class="kds-ticket-list">
+                    ${itemsHtml}
+                </ul>
+                <div class="kds-ticket-footer">
+                    ${isPreparado 
+                        ? `<span class="kds-status-listo"><i data-lucide="check-circle" class="icon-small"></i> Listo</span>` 
+                        : `<button class="btn-preparar kds-btn-preparar" data-id="${pedido.id}"><i data-lucide="chef-hat" class="icon-small"></i> Preparado</button>`
+                    }
+                </div>
+            </div>
+        `;
+    });
+    
+    kdsGrid.innerHTML = html;
+    lucide.createIcons();
+    
+    document.querySelectorAll('.btn-preparar').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = Number(e.currentTarget.getAttribute('data-id'));
+            const pedidoIndex = pedidosActivos.findIndex(p => p.id === id);
+            if(pedidoIndex > -1) {
+                const targetBtn = e.currentTarget;
+                const originalText = targetBtn.innerHTML;
+                targetBtn.innerHTML = '...';
+                targetBtn.disabled = true;
+                
+                // Optimistic UI Update to feel instantaneous
+                const estadoAnterior = pedidosActivos[pedidoIndex].estado;
+                pedidosActivos[pedidoIndex].estado = 'preparado';
+                savePedidos();
+                
+                fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ type: 'update_order', id_pedido: id })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status !== 'success') {
+                        // Revert if failed
+                        pedidosActivos[pedidoIndex].estado = estadoAnterior;
+                        savePedidos();
+                        alert("Error en backend: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    // Revert if failed
+                    pedidosActivos[pedidoIndex].estado = estadoAnterior;
+                    savePedidos();
+                    alert("Sin conexión para marcar como preparado en base de datos.");
+                })
+                .finally(() => {
+                    // Update btn state ONLY if it wasn't successfully marked as ready
+                    if(pedidosActivos[pedidoIndex].estado !== 'preparado') {
+                        targetBtn.innerHTML = originalText;
+                        targetBtn.disabled = false;
+                    }
+                });
+            }
+        });
+    });
+}

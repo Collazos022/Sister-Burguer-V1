@@ -1,9 +1,9 @@
-const CACHE_NAME = 'sb-admin-cache-v2.3.4';
+const CACHE_NAME = 'sb-admin-cache-v2.3.24';
 const urlsToCache = [
   './',
   './index.html',
-  './style.css?v=2.3.4',
-  './app.js?v=2.3.4',
+  './style.css?v=2.3.24',
+  './app.js?v=2.3.24',
   './SB_V.1.ico',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap',

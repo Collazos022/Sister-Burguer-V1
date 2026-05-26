@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.3.4">
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -39,40 +39,37 @@
                     <span>Notificaciones</span>
                     <span class="badge"></span>
                 </a>
-                <a href="#" class="nav-item active" data-tab="dashboard">
+                <a href="#" class="nav-item active" data-tab="dashboard" data-roles="admin">
                     <i data-lucide="layout-grid"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="nav-item" data-tab="sales">
+                <a href="#" class="nav-item" data-tab="pos" data-roles="servicio">
+                    <i data-lucide="shopping-cart"></i>
+                    <span>Punto de Venta</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="cocina" data-roles="cocina">
+                    <i data-lucide="chef-hat"></i>
+                    <span>Órdenes</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="sales" data-roles="admin">
                     <i data-lucide="trending-up"></i>
                     <span>Ventas</span>
                 </a>
-                <a href="#" class="nav-item nav-item-primary" id="btn-open-form">
-                    <i data-lucide="plus-circle"></i>
-                    <span>Nueva Entrada</span>
-                </a>
-                <a href="#" class="nav-item" data-tab="expenses">
+                <a href="#" class="nav-item" data-tab="expenses" data-roles="admin">
                     <i data-lucide="receipt"></i>
                     <span>Gastos</span>
                 </a>
-                <a href="#" class="nav-item" data-tab="inventory">
+                <a href="#" class="nav-item" data-tab="inventory" data-roles="admin,servicio,cocina">
                     <i data-lucide="package"></i>
                     <span>Inventario</span>
                 </a>
+                <a href="#" class="nav-item" id="btn-open-form" data-roles="admin,servicio,cocina">
+                    <i data-lucide="plus-circle"></i>
+                    <span>Registrar</span>
+                </a>
             </nav>
 
-            <div class="sidebar-footer">
-                <div class="user-card">
-                    <img src="SB_V.1.ico" alt="User">
-                    <div class="user-info">
-                        <span class="name">Gerencia</span>
-                        <span class="status">Online</span>
-                    </div>
-                </div>
-                <button class="btn-logout">
-                    <i data-lucide="log-out"></i>
-                </button>
-            </div>
+            <!-- Sidebar footer removed per user request -->
         </aside>
 
         <main class="main-container">
@@ -83,7 +80,15 @@
                             <img src="SB_V.1.ico" alt="Sister Burguer">
                         </div>
                         <h1 id="main-title">Resumen Financiero</h1>
-                        <button class="mobile-btn-notify"><i data-lucide="bell"></i></button>
+                        <button class="mobile-btn-notify" style="margin-left: auto;"><i data-lucide="bell"></i></button>
+                        <div class="profile-selector-container">
+                            <i id="profile-icon" data-lucide="user" class="profile-icon-svg"></i>
+                            <select id="role-selector" class="role-selector-overlay">
+                                <option value="admin" class="role-option">Administrador</option>
+                                <option value="servicio" class="role-option">Servicio (POS)</option>
+                                <option value="cocina" class="role-option">Cocina (KDS)</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="header-controls">
                         <div class="date-controls">
@@ -96,6 +101,13 @@
                             <button data-period="semana">Semana</button>
                             <button data-period="mes">Mes</button>
                             <button data-period="año">Año</button>
+                        </div>
+                        <div class="pos-order-wrapper" id="pos-order-wrapper" style="display: none;">
+                            <button class="scroll-arrow" id="scroll-left" style="display: none;"><i data-lucide="chevron-left"></i></button>
+                            <div class="pos-order-bar" id="pos-order-bar">
+                                <!-- Pills go here -->
+                            </div>
+                            <button class="scroll-arrow" id="scroll-right" style="display: none;"><i data-lucide="chevron-right"></i></button>
                         </div>
                     </div>
                 </div>
@@ -159,8 +171,8 @@
                             <div class="kpi-header">
                                 <span class="label">Top 3 de Ventas</span>
                             </div>
-                            <div class="kpi-body" id="top-ventas-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
-                                <p style="font-size: 0.85rem; color: var(--text-muted);">Calculando...</p>
+                            <div class="kpi-body top-sales-list-box" id="top-ventas-list">
+                                <p class="top-sales-calc">Calculando...</p>
                             </div>
                         </div>
                     </div>
@@ -189,6 +201,76 @@
                     </div>
 
 
+                </section>
+
+                <section class="dashboard-view" id="pos" style="display: none;">
+                    <div class="pos-container">
+                        <div class="pos-header pos-header-row">
+                            <div class="pos-selector pos-flex-1">
+                                <select id="pos-destino" class="pos-select">
+                                    <option value="" disabled selected>Selecciona destino...</option>
+                                    <option value="Mesa 1">Mesa 1</option>
+                                    <option value="Mesa 2">Mesa 2</option>
+                                    <option value="Mesa 3">Mesa 3</option>
+                                    <option value="Mesa 4">Mesa 4</option>
+                                    <option value="Mesa 5">Mesa 5</option>
+                                    <option value="Mesa 6">Mesa 6</option>
+                                    <option value="Mesa 7">Mesa 7</option>
+                                    <option value="Domicilio 1">Domicilio 1</option>
+                                    <option value="Domicilio 2">Domicilio 2</option>
+                                    <option value="Domicilio 3">Domicilio 3</option>
+                                    <option value="Domicilio 4">Domicilio 4</option>
+                                    <option value="Domicilio 5">Domicilio 5</option>
+                                    <option value="Domicilio 6">Domicilio 6</option>
+                                    <option value="Domicilio 7">Domicilio 7</option>
+                                    <option value="Domicilio 8">Domicilio 8</option>
+                                    <option value="Domicilio 9">Domicilio 9</option>
+                                    <option value="Domicilio 10">Domicilio 10</option>
+                                </select>
+                            </div>
+                            <input type="text" id="pos-nombre" class="pos-input pos-flex-2" placeholder="Nombre del Cliente (Domicilio)" style="display:none;">
+                        </div>
+
+                        <div class="pos-cart pos-cart-box">
+                            <div class="cart-items cart-items-container" id="cart-items">
+                                <p class="empty-text-state">El carrito está vacío</p>
+                            </div>
+
+                            <div class="pos-add-item pos-add-item-container">
+                                <label>Agregar Plato</label>
+                                <select id="pos-plato" class="pos-select">
+                                    <option value="">Cargando menú...</option>
+                                </select>
+                                <div class="btn-add-cart-row">
+                                    <input type="text" id="pos-notas" class="pos-input pos-flex-1" placeholder="Notas (Ej. Sin cebolla)">
+                                    <button id="btn-add-cart" class="btn-primary btn-add-cart-square"><i data-lucide="plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pos-footer pos-footer-box">
+                            <div class="pos-total-row pos-total-row-styled">
+                                <span>Total del Pedido</span>
+                                <span id="pos-total-price" class="pos-total-price-styled">$0</span>
+                            </div>
+                            <div class="pos-payment radio-group">
+                                <label class="radio-label"><input type="radio" name="pos-pago" value="Efectivo" checked> Efectivo</label>
+                                <label class="radio-label"><input type="radio" name="pos-pago" value="Transferencia"> Transferencia</label>
+                            </div>
+                            <div class="pos-actions pos-actions-row">
+                                <button id="btn-pos-crear" class="btn-pos-crear btn-pos-action">Crear</button>
+                                <button id="btn-pos-editar" class="btn-pos-modificar btn-pos-action" style="display: none;">Modificar</button>
+                                <button id="btn-pos-entregar" class="btn-pos-entregar btn-pos-action" style="display: none;">Entregar</button>
+                                <button id="btn-pos-limpiar" class="btn-pos-limpiar btn-pos-action">Limpiar</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dashboard-view" id="cocina" style="display: none;">
+                    <div class="kds-grid kds-grid-layout" id="kds-grid">
+                        <p class="empty-text-kds">No hay pedidos pendientes</p>
+                    </div>
                 </section>
 
                 <section class="dashboard-view" id="sales" style="display: none;">
@@ -260,11 +342,7 @@
             <form id="entry-form">
                 <div class="form-tabs">
                     <label class="tab-option">
-                        <input type="radio" name="entry-type" value="sale" checked>
-                        <span>Venta</span>
-                    </label>
-                    <label class="tab-option">
-                        <input type="radio" name="entry-type" value="purchase">
+                        <input type="radio" name="entry-type" value="purchase" checked>
                         <span>Compra Insumo</span>
                     </label>
                     <label class="tab-option">
@@ -273,43 +351,8 @@
                     </label>
                 </div>
 
-                <div class="form-body" id="form-venta" style="display: block;">
-                    <div class="form-group">
-                        <label>Fecha de la Transacción</label>
-                        <input type="date" id="v-date" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Nombre del Plato</label>
-                        <select id="v-plato" required>
-                            <option value="">Cargando menú...</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Cantidad</label>
-                            <input type="number" id="v-cantidad" placeholder="1" value="1" required min="1">
-                        </div>
-                        <div class="form-group">
-                            <label>Método de Pago</label>
-                            <select id="v-pago" required>
-                                <option value="Efectivo">Efectivo</option>
-                                <option value="Transferencia">Transferencia</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>¿Domicilio?</label>
-                            <select id="v-domicilio">
-                                <option value="NO">NO</option>
-                                <option value="SI">SI</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Total Venta ($)</label>
-                            <input type="number" id="v-total" placeholder="0" required>
-                        </div>
-                    </div>
+                <div class="form-body" id="form-venta" style="display: none;">
+                    <!-- POS now handles sales -->
                 </div>
 
                 <div class="form-body" id="form-gasto" style="display: none;">
@@ -347,7 +390,7 @@
                     </div>
                 </div>
 
-                <div class="form-body" id="form-compra" style="display: none;">
+                <div class="form-body" id="form-compra" style="display: block;">
                     <div class="form-group">
                         <label>Fecha de la Compra</label>
                         <input type="date" id="c-date" required>
@@ -382,7 +425,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=2.3.4"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
