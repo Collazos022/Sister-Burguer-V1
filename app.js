@@ -1199,7 +1199,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="qty-controls">
                         <button class="btn-qty-plus" data-index="${index}"><i data-lucide="chevron-up"></i></button>
-                        <span class="qty-display">${item.cantidad}</span>
                         <button class="btn-qty-minus" data-index="${index}"><i data-lucide="chevron-down"></i></button>
                     </div>
                 </div>
