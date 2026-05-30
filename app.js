@@ -997,7 +997,10 @@ function renderOrderBar() {
                 if (btnPreparar) {
                     const ticketDiv = btnPreparar.closest('.kds-ticket');
                     if (ticketDiv) {
-                        ticketDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        const scrollContainer = document.querySelector('.content-scroll');
+                        if (scrollContainer) {
+                            scrollContainer.scrollTo({ top: ticketDiv.offsetTop - 120, behavior: 'smooth' });
+                        }
                         const originalBorder = ticketDiv.style.border;
                         ticketDiv.style.border = '2px solid var(--primary)';
                         setTimeout(() => ticketDiv.style.border = originalBorder, 2000);
@@ -1007,7 +1010,8 @@ function renderOrderBar() {
                 // Auto-scroll the bar itself
                 bar.querySelectorAll('.order-pill').forEach(p => p.classList.remove('selected-pill', 'active'));
                 e.currentTarget.classList.add('selected-pill', 'active');
-                e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                const scrollLeft = e.currentTarget.offsetLeft - (bar.clientWidth / 2) + (e.currentTarget.clientWidth / 2);
+                bar.scrollTo({ left: scrollLeft, behavior: 'smooth' });
                 return;
             }
             loadOrderIntoPOS(id);
@@ -1074,7 +1078,13 @@ function loadOrderIntoPOS(id) {
     
     setTimeout(() => {
         const activePill = document.querySelector('.order-pill.active');
-        if (activePill) activePill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        if (activePill) {
+            const posBar = document.getElementById('pos-order-bar');
+            if (posBar) {
+                const sl = activePill.offsetLeft - (posBar.clientWidth / 2) + (activePill.clientWidth / 2);
+                posBar.scrollTo({ left: sl, behavior: 'smooth' });
+            }
+        }
         const posView = document.querySelector('.main-container');
         if (posView) posView.scrollTo({ top: 0, behavior: 'smooth' });
     }, 50);
