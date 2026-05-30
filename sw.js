@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sb-admin-cache-v2.4.5';
+const CACHE_NAME = 'sb-admin-cache-v2.4.7';
 const urlsToCache = [
   './',
   './index.html',

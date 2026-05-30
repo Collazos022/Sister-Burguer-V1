@@ -1049,9 +1049,16 @@ function loadOrderIntoPOS(id) {
     if (radioPago) radioPago.checked = true;
     
     posCart = JSON.parse(JSON.stringify(pedido.items)); // Deep copy
-    renderCart();
+    if(typeof renderCart === 'function') renderCart();
     updatePOSButtons();
     renderOrderBar(); // Trigger UI update for the active pill
+    
+    setTimeout(() => {
+        const activePill = document.querySelector('.order-pill.active');
+        if (activePill) activePill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        const posView = document.querySelector('.main-container');
+        if (posView) posView.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
 }
 
 function updatePOSButtons() {
@@ -1119,6 +1126,7 @@ function resetPOS() {
     if(posNombre) posNombre.value = '';
     if(typeof updateAvailableDestinations === 'function') updateAvailableDestinations();
     if(typeof renderCart === 'function') renderCart();
+    if(typeof renderOrderBar === 'function') renderOrderBar();
     updatePOSButtons();
 }
 
@@ -1190,9 +1198,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         $${(item.precio * item.cantidad).toLocaleString()}
                     </div>
                     <div class="qty-controls">
-                        <button class="btn-qty-minus" data-index="${index}"><i data-lucide="minus"></i></button>
+                        <button class="btn-qty-plus" data-index="${index}"><i data-lucide="chevron-up"></i></button>
                         <span class="qty-display">${item.cantidad}</span>
-                        <button class="btn-qty-plus" data-index="${index}"><i data-lucide="plus"></i></button>
+                        <button class="btn-qty-minus" data-index="${index}"><i data-lucide="chevron-down"></i></button>
                     </div>
                 </div>
             `;
