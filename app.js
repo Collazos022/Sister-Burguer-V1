@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'expenses': 'Gastos y Compras',
                 'inventory': 'Alerta de Inventario',
                 'pos': 'Punto de Venta',
-                'cocina': 'Órdenes Activas'
+                'cocina': 'Cocina'
             };
             mainTitle.textContent = titles[tabId] || 'Panel Administrativo';
         });
@@ -1490,7 +1490,7 @@ function renderKDS() {
         const isPreparado = pedido.estado === 'preparado';
         
         html += `
-            <div class="kds-ticket ${isPreparado ? 'preparado' : ''}">
+            <div class="kds-ticket ${isPreparado ? 'preparado' : ''}" onclick="editOrder(${pedido.id})" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                 <div class="kds-ticket-header">
                     <h3 class="kds-ticket-title">${title}</h3>
                     <span class="kds-ticket-time">${new Date(pedido.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
@@ -1513,6 +1513,7 @@ function renderKDS() {
     
     document.querySelectorAll('.btn-preparar').forEach(btn => {
         btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const id = Number(e.currentTarget.getAttribute('data-id'));
             const pedidoIndex = pedidosActivos.findIndex(p => p.id === id);
             if(pedidoIndex > -1) {
