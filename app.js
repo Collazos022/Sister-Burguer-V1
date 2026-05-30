@@ -991,6 +991,25 @@ function renderOrderBar() {
     bar.querySelectorAll('.order-pill').forEach(pill => {
         pill.addEventListener('click', (e) => {
             const id = Number(e.currentTarget.getAttribute('data-id'));
+            const activeTab = document.querySelector('.nav-item.active');
+            if (activeTab && activeTab.getAttribute('data-tab') === 'cocina') {
+                const btnPreparar = document.querySelector(`.kds-btn-preparar[data-id="${id}"]`);
+                if (btnPreparar) {
+                    const ticketDiv = btnPreparar.closest('.kds-ticket');
+                    if (ticketDiv) {
+                        ticketDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        const originalBorder = ticketDiv.style.border;
+                        ticketDiv.style.border = '2px solid var(--primary)';
+                        setTimeout(() => ticketDiv.style.border = originalBorder, 2000);
+                    }
+                }
+                
+                // Auto-scroll the bar itself
+                bar.querySelectorAll('.order-pill').forEach(p => p.classList.remove('selected-pill', 'active'));
+                e.currentTarget.classList.add('selected-pill', 'active');
+                e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                return;
+            }
             loadOrderIntoPOS(id);
         });
     });
@@ -1490,7 +1509,7 @@ function renderKDS() {
         const isPreparado = pedido.estado === 'preparado';
         
         html += `
-            <div class="kds-ticket ${isPreparado ? 'preparado' : ''}" onclick="editOrder(${pedido.id})" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <div class="kds-ticket ${isPreparado ? 'preparado' : ''}">
                 <div class="kds-ticket-header">
                     <h3 class="kds-ticket-title">${title}</h3>
                     <span class="kds-ticket-time">${new Date(pedido.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
@@ -1513,7 +1532,6 @@ function renderKDS() {
     
     document.querySelectorAll('.btn-preparar').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.stopPropagation();
             const id = Number(e.currentTarget.getAttribute('data-id'));
             const pedidoIndex = pedidosActivos.findIndex(p => p.id === id);
             if(pedidoIndex > -1) {
