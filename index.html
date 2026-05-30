@@ -205,33 +205,38 @@
 
                 <section class="dashboard-view" id="pos" style="display: none;">
                     <div class="pos-container">
-                        <div class="pos-header pos-header-row">
-                            <div class="pos-selector pos-flex-1">
-                                <select id="pos-destino" class="pos-select">
-                                    <option value="" disabled selected>Selecciona destino...</option>
-                                    <option value="Mesa 1">Mesa 1</option>
-                                    <option value="Mesa 2">Mesa 2</option>
-                                    <option value="Mesa 3">Mesa 3</option>
-                                    <option value="Mesa 4">Mesa 4</option>
-                                    <option value="Mesa 5">Mesa 5</option>
-                                    <option value="Mesa 6">Mesa 6</option>
-                                    <option value="Mesa 7">Mesa 7</option>
-                                    <option value="Domicilio 1">Domicilio 1</option>
-                                    <option value="Domicilio 2">Domicilio 2</option>
-                                    <option value="Domicilio 3">Domicilio 3</option>
-                                    <option value="Domicilio 4">Domicilio 4</option>
-                                    <option value="Domicilio 5">Domicilio 5</option>
-                                    <option value="Domicilio 6">Domicilio 6</option>
-                                    <option value="Domicilio 7">Domicilio 7</option>
-                                    <option value="Domicilio 8">Domicilio 8</option>
-                                    <option value="Domicilio 9">Domicilio 9</option>
-                                    <option value="Domicilio 10">Domicilio 10</option>
-                                </select>
-                            </div>
-                            <input type="text" id="pos-nombre" class="pos-input pos-flex-2" placeholder="Nombre del Cliente (Domicilio)" style="display:none;">
-                        </div>
-
                         <div class="pos-cart pos-cart-box">
+                            <div class="pos-header pos-header-row" style="flex-direction: column; align-items: stretch; gap: 0.5rem; margin-bottom: 1rem;">
+                                <label style="display:block; color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Destino:</label>
+                                <div style="display:flex; gap: 1rem; width: 100%;">
+                                    <div class="pos-selector pos-flex-1">
+                                        <select id="pos-destino" class="pos-select">
+                                            <option value="" disabled selected>Selecciona destino...</option>
+                                            <option value="Mesa 1">Mesa 1</option>
+                                            <option value="Mesa 2">Mesa 2</option>
+                                            <option value="Mesa 3">Mesa 3</option>
+                                            <option value="Mesa 4">Mesa 4</option>
+                                            <option value="Mesa 5">Mesa 5</option>
+                                            <option value="Mesa 6">Mesa 6</option>
+                                            <option value="Mesa 7">Mesa 7</option>
+                                            <option value="Domicilio 1">Domicilio 1</option>
+                                            <option value="Domicilio 2">Domicilio 2</option>
+                                            <option value="Domicilio 3">Domicilio 3</option>
+                                            <option value="Domicilio 4">Domicilio 4</option>
+                                            <option value="Domicilio 5">Domicilio 5</option>
+                                            <option value="Domicilio 6">Domicilio 6</option>
+                                            <option value="Domicilio 7">Domicilio 7</option>
+                                            <option value="Domicilio 8">Domicilio 8</option>
+                                            <option value="Domicilio 9">Domicilio 9</option>
+                                            <option value="Domicilio 10">Domicilio 10</option>
+                                        </select>
+                                    </div>
+                                    <input type="text" id="pos-nombre" class="pos-input pos-flex-2" placeholder="Nombre del Cliente" style="display:none;">
+                                </div>
+                            </div>
+                            
+                            <div class="cart-separator"></div>
+
                             <div class="cart-items cart-items-container" id="cart-items">
                                 <p class="empty-text-state">El carrito está vacío</p>
                             </div>

@@ -3,6 +3,12 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxH1PK-Tfy-Zon2OluMTCnh
 let dbData = { ventas: [], gastos: [], compras: [], inventario: [], menu: [] };
 let currentPeriod = 'dia';
 
+const getLocalDateStr = (d = new Date()) => {
+    const offset = d.getTimezoneOffset();
+    const dLocal = new Date(d.getTime() - (offset*60*1000));
+    return dLocal.toISOString().split('T')[0];
+};
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
@@ -41,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancel = document.getElementById('btn-cancel');
 
     const setDefaultDates = () => {
-        const tStr = new Date().toISOString().split('T')[0];
+        const tStr = getLocalDateStr();
         ['v-date', 'g-date', 'c-date'].forEach(id => {
             const el = document.getElementById(id);
             if(el) el.value = tStr;
@@ -84,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalDateStr();
     dateInput.value = todayStr;
     ['v-date', 'g-date', 'c-date'].forEach(id => {
         const el = document.getElementById(id);
@@ -99,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (currentPeriod === 'semana') d.setDate(d.getDate() - 7);
         else if (currentPeriod === 'mes') d.setMonth(d.getMonth() - 1);
         else if (currentPeriod === 'año') d.setFullYear(d.getFullYear() - 1);
-        dateInput.value = d.toISOString().split('T')[0];
+        dateInput.value = getLocalDateStr(d);
         updateDashboard();
     });
 
@@ -109,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (currentPeriod === 'semana') d.setDate(d.getDate() + 7);
         else if (currentPeriod === 'mes') d.setMonth(d.getMonth() + 1);
         else if (currentPeriod === 'año') d.setFullYear(d.getFullYear() + 1);
-        dateInput.value = d.toISOString().split('T')[0];
+        dateInput.value = getLocalDateStr(d);
         updateDashboard();
     });
 
@@ -535,6 +541,7 @@ function fetchData() {
                             cliente: p.Cliente || p["Nombre Cliente"] || '',
                             items: p.Detalle_JSON ? JSON.parse(p.Detalle_JSON) : [],
                             estado: p.Estado || 'pendiente',
+                            fecha: p.Fecha || p['Fecha '] || getLocalDateStr(),
                             pago: p.Pago || 'Efectivo'
                         }));
                     savePedidos();
@@ -947,6 +954,7 @@ function savePedidos() {
 }
 
 function renderOrderBar() {
+    if(typeof updateAvailableDestinations === 'function') updateAvailableDestinations();
     const bar = document.getElementById('pos-order-bar');
     if (!bar) return;
     
@@ -1016,6 +1024,7 @@ function loadOrderIntoPOS(id) {
     }
     
     posActiveOrderId = id;
+    if(typeof updateAvailableDestinations === 'function') updateAvailableDestinations();
     
     // Switch to POS tab if not there
     const posTab = document.querySelector('.nav-item[data-tab="pos"]');
@@ -1075,10 +1084,16 @@ function updatePOSButtons() {
         
         if (estado === 'preparado') {
             if (btnEditar) { btnEditar.style.display = 'block'; btnEditar.disabled = false; }
-            if (btnEntregar) { btnEntregar.style.display = 'block'; btnEntregar.disabled = false; }
+            if (btnEntregar) { 
+                btnEntregar.style.display = 'block'; 
+                btnEntregar.disabled = false; 
+                btnEntregar.textContent = 'Cobrado'; 
+            }
+            if (btnLimpiar) { btnLimpiar.style.display = 'none'; }
         } else {
             if (btnEditar) { btnEditar.style.display = 'block'; btnEditar.disabled = false; }
             if (btnEntregar) { btnEntregar.style.display = 'none'; }
+            if (btnLimpiar) { btnLimpiar.style.display = 'block'; }
         }
     } else {
         if (btnCrear) {
@@ -1098,9 +1113,12 @@ function updatePOSButtons() {
 function resetPOS() {
     posActiveOrderId = null;
     posCart = [];
+    const posDestino = document.getElementById('pos-destino');
+    if(posDestino) { posDestino.value = ''; posDestino.selectedIndex = 0; }
     const posNombre = document.getElementById('pos-nombre');
     if(posNombre) posNombre.value = '';
-    renderCart();
+    if(typeof updateAvailableDestinations === 'function') updateAvailableDestinations();
+    if(typeof renderCart === 'function') renderCart();
     updatePOSButtons();
 }
 
@@ -1171,7 +1189,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="cart-item-price">
                         $${(item.precio * item.cantidad).toLocaleString()}
                     </div>
-                    <button class="btn-remove-item cart-btn-remove" data-index="${index}"><i data-lucide="trash-2"></i></button>
+                    <div class="qty-controls">
+                        <button class="btn-qty-minus" data-index="${index}"><i data-lucide="minus"></i></button>
+                        <span class="qty-display">${item.cantidad}</span>
+                        <button class="btn-qty-plus" data-index="${index}"><i data-lucide="plus"></i></button>
+                    </div>
                 </div>
             `;
         });
@@ -1179,11 +1201,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (posTotalPrice) posTotalPrice.textContent = '$' + total.toLocaleString();
         lucide.createIcons();
         
-        document.querySelectorAll('.btn-remove-item').forEach(btn => {
+        document.querySelectorAll('.btn-qty-minus').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const idx = e.currentTarget.getAttribute('data-index');
-                posCart.splice(idx, 1);
+                const itm = posCart[idx];
+                itm.cantidad--;
+                if (itm.cantidad <= 0) {
+                    posCart.splice(idx, 1);
+                }
                 renderCart_local();
+                if(typeof updatePOSButtons === 'function') updatePOSButtons();
+            });
+        });
+        document.querySelectorAll('.btn-qty-plus').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = e.currentTarget.getAttribute('data-index');
+                const itm = posCart[idx];
+                itm.cantidad++;
+                renderCart_local();
+                if(typeof updatePOSButtons === 'function') updatePOSButtons();
             });
         });
         
@@ -1357,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const payload = {
                     type: 'complete_order',
                     id_pedido: pedido.id,
-                    fecha: new Date().toISOString().split('T')[0],
+                    fecha: pedido.fecha || getLocalDateStr(),
                     destino: pedido.destino,
                     metodo_pago: pedido.pago,
                     total: totalPedido,
@@ -1512,5 +1548,26 @@ function renderKDS() {
                 });
             }
         });
+    });
+}
+
+function updateAvailableDestinations() {
+    const select = document.getElementById('pos-destino');
+    if (!select) return;
+    const ocupadas = pedidosActivos.filter(p => p.estado !== 'entregado' && p.destino).map(p => p.destino);
+    Array.from(select.options).forEach(opt => {
+        if (!opt.value) return;
+        let currentEditingDestino = '';
+        if (posActiveOrderId) {
+            const p = pedidosActivos.find(x => x.id === posActiveOrderId);
+            if (p) currentEditingDestino = p.destino;
+        }
+        if (ocupadas.includes(opt.value) && opt.value !== currentEditingDestino) {
+            opt.disabled = true;
+            opt.style.display = 'none';
+        } else {
+            opt.disabled = false;
+            opt.style.display = '';
+        }
     });
 }

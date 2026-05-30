@@ -101,7 +101,7 @@ function doPost(e) {
         params.destino, 
         params.nombre_cliente || "", 
         params.metodo_pago, 
-        "CREADO", 
+        "pendiente", 
         params.total, 
         params.detalle_json
       ]);
@@ -113,7 +113,7 @@ function doPost(e) {
       const data = sheetPedidos.getDataRange().getValues();
       for (let i = 1; i < data.length; i++) {
         if (data[i][0] == params.id_pedido) { // Columna 1 = ID_Pedido
-          sheetPedidos.getRange(i + 1, 6).setValue("PREPARADO"); // Columna 6 = Estado
+          sheetPedidos.getRange(i + 1, 6).setValue("preparado"); // Columna 6 = Estado
           return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
         }
       }
@@ -126,7 +126,7 @@ function doPost(e) {
       for (let i = 1; i < data.length; i++) {
         if (data[i][0] == params.id_pedido) { // Columna 1 = ID_Pedido
           sheetPedidos.getRange(i + 1, 5).setValue(params.total); // Total
-          sheetPedidos.getRange(i + 1, 6).setValue("Pendiente"); // Vuelve a pendiente
+          sheetPedidos.getRange(i + 1, 6).setValue("pendiente"); // Vuelve a pendiente
           sheetPedidos.getRange(i + 1, 8).setValue(params.detalle_json); // JSON nuevo
           return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
         }
