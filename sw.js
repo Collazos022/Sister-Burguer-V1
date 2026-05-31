@@ -1,9 +1,9 @@
-const CACHE_NAME = 'sb-admin-cache-v2.4.11';
+const CACHE_NAME = 'sb-admin-cache-v3.0.0';
 const urlsToCache = [
   './',
   './index.html',
-  './style.css?v=2.3.24',
-  './app.js?v=2.3.24',
+  './style.css?v=1780190759237',
+  './app.js?v=1780190759237',
   './SB_V.1.ico',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap',
@@ -24,7 +24,18 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   // Ignorar peticiones a la API de Google Sheets (no cachearlas directamente aquí o usar estrategia Network First)
   if (event.request.url.includes('script.google.com')) {
-    event.respondWith(fetch(event.request));
+    
+  // If it's a static asset, try network first during active development
+  if (event.request.url.includes('.js') || event.request.url.includes('.css') || event.request.url.includes('.html') || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  event.respondWith(fetch(event.request));
     return;
   }
 
