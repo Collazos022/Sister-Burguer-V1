@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     /* Marca e Interfaz Principal */
     --primary: #FF0080;
     --accent: #FFD60A;
@@ -952,6 +952,7 @@ body {
 .radio-group {
     display: flex;
     gap: 15px;
+    justify-content: center;
 }
 
 .radio-label {
@@ -1112,7 +1113,7 @@ button:disabled {
 }
 .pos-flex-1 { flex: 1; }
 .pos-flex-2 { flex: 2; }
-.pos-cart-box { flex: 1 1 350px; background: var(--bg-card); border-radius: 12px; padding: 15px; border: 1px solid var(--border-input); min-width: 0; }
+.pos-cart-box { flex: 1 1 350px; max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: 12px; padding: 15px; border: 1px solid var(--border-input); min-width: 0; }
 .cart-items-container {
     display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;
 }
