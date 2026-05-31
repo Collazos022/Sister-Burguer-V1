@@ -1290,32 +1290,7 @@ button:disabled {
     margin: 15px 0;
 }
 
-/* Responsive styling for Register view */
-@media (max-width: 768px) {
-    #register .pos-container {
-        flex-direction: column !important;
-        height: auto !important;
-        overflow-y: visible !important;
-    }
-    #register .form-scrollable {
-        flex: none !important;
-        height: auto !important;
-        overflow: visible !important;
-    }
-    #register .pos-cart {
-        height: auto !important;
-        max-height: none !important;
-    }
-}
 
-/* Overrides for Register full-page layout */
-#register {
-    padding: 20px;
-    box-sizing: border-box;
-}
-#register .pos-container, #pos .pos-container {
-    padding: 0 !important;
-}
 
 /* Register Header optimizations */
 #register-type-wrapper {
@@ -1333,13 +1308,7 @@ button:disabled {
     border-color: #FFD700 !important;
 }
 
-/* Fix for horizontal scroll and layout on mobile register view */
-#register {
-    /* display: block !important; REMOVED to allow JS to hide it */
-    width: 100%;
-    overflow-x: hidden;
-    overflow-y: auto; /* Ensure it scrolls */
-}
+
 /* Removed incorrect desktop overrides that broke flex */
 .pos-actions-row { 
     width: 100%; 
@@ -1354,7 +1323,7 @@ button:disabled {
     font-size: 0.9rem;
 }
 /* Refactored inline styles to utility classes */
-.pos-container { display: flex; gap: 20px; flex-wrap: wrap; padding: 20px; }
+.pos-container { display: flex; gap: 20px; flex-wrap: wrap; }
 .form-label { display: block; color: var(--text-light); font-size: 0.9rem; font-weight: 500; }
 .pos-header-row { flex-direction: column; align-items: stretch; gap: 0.5rem; margin-bottom: 1rem; }
 .flex-row-gap { display: flex; gap: 1rem; width: 100%; }
