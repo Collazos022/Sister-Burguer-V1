@@ -1,81 +1,72 @@
-const { chromium } = require('playwright');
+const API_URL = 'https://script.google.com/macros/s/AKfycbxH1PK-Tfy-Zon2OluMTCnhPs5XORiGN32nxbmm4UQ8JR_DHIbXln8vr6CGGxaZGKxKAw/exec';
 
-(async () => {
-    const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
+async function runE2ETest() {
+    console.log("Simulando carga útil EXACTA de la interfaz (End-to-End Test)...");
     
-    page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
-    page.on('pageerror', exception => console.log("PAGE ERROR:", exception));
-    
-    let resultDialog = "";
-    page.on('dialog', async dialog => {
-        const msg = dialog.message();
-        console.log("DIALOG OPENED:", msg);
-        if(msg.includes("Transacciones registradas exitosamente")) {
-            resultDialog = "SUCCESS";
-        } else {
-            resultDialog = "ERROR: " + msg;
+    // Esta es la estructura literal que genera app.js cuando se da clic en "Registrar Todo"
+    const items = [
+        // Simulando 2 Gastos Operativos agregados desde la interfaz
+        {
+            type: 'expense',
+            categoria: 'Servicios',
+            descripcion: 'Pago de Internet E2E',
+            valor: 85000,
+            fecha: '2026-05-31',
+            pago: 'Transferencia',
+            comentarios: 'Este es el comentario general de la UI'
+        },
+        {
+            type: 'expense',
+            categoria: 'Nomina',
+            descripcion: 'Pago quincena E2E',
+            valor: 50000,
+            fecha: '2026-05-31',
+            pago: 'Transferencia',
+            comentarios: 'Este es el comentario general de la UI'
+        },
+        // Simulando 2 Compras de Insumos agregados desde la interfaz
+        {
+            type: 'purchase',
+            categoria: 'Aderesos y Salsas',
+            insumo: 'Salsa BBQ',
+            unidad: 'Kilogramo (Kg)',
+            cantidad: 2,
+            costoUnit: 3500,
+            costoTotal: 7000,
+            fecha: '2026-05-31',
+            pago: 'Transferencia',
+            comentarios: 'Este es el comentario general de la UI'
+        },
+        {
+            type: 'purchase',
+            categoria: 'Aderesos y Salsas',
+            insumo: 'Maíz Dulce',
+            unidad: 'Kilogramo (Kg)',
+            cantidad: 3,
+            costoUnit: 4000,
+            costoTotal: 12000,
+            fecha: '2026-05-31',
+            pago: 'Transferencia',
+            comentarios: 'Este es el comentario general de la UI'
         }
-        await dialog.accept();
-    });
+    ];
 
-    console.log("Navegando a localhost:3000...");
-    await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
-    
-    console.log("Cambiando a pestaña Gastos...");
-    await page.click('.nav-item[data-tab="expenses"]');
-    
-    // Test 1: Compra Insumos
-    console.log("Esperando carga de categorías de inventario desde el backend...");
+    const payload = {
+        type: 'batch_transactions',
+        items: JSON.stringify(items)
+    };
+
     try {
-        await page.waitForFunction(() => document.querySelectorAll('#exp-cat-compra option').length > 1, { timeout: 20000 });
-        
-        // Select first valid category
-        const catVal = await page.$eval('#exp-cat-compra option:nth-child(2)', el => el.value);
-        await page.selectOption('#exp-cat-compra', catVal);
-        
-        // Wait for insumos
-        await page.waitForTimeout(1000);
-        const insVal = await page.$eval('#exp-insumo option:nth-child(2)', el => el.value);
-        await page.selectOption('#exp-insumo', insVal);
-        
-        await page.fill('#exp-cantidad', '5');
-        await page.fill('#exp-costo-unitario', '1000');
-        await page.fill('#exp-comentarios-compra', 'Prueba E2E Automatizada');
-        
-        await page.click('#btn-add-expense');
-        console.log("=> Compra de insumo agregada a la lista.");
-    } catch(e) {
-        console.log("No se pudieron cargar insumos (posiblemente la DB esta vacia o tardo mucho).", e);
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        });
+        const data = await response.json();
+        console.log("Respuesta del servidor:", data);
+    } catch (e) {
+        console.error("Error enviando datos:", e);
     }
-    
-    await page.waitForTimeout(500);
-    
-    // Test 2: Gasto Operativo
-    console.log("Cambiando a Gasto Operativo...");
-    await page.click('#btn-type-expense');
-    await page.selectOption('#exp-cat-gasto', 'Mantenimiento');
-    await page.fill('#exp-descripcion', 'Reparación Prueba E2E');
-    await page.fill('#exp-valor-gasto', '25000');
-    await page.selectOption('#exp-pago-gasto', 'Transferencia');
-    await page.fill('#exp-comentarios-gasto', 'Prueba automática');
-    
-    await page.click('#btn-add-expense');
-    console.log("=> Gasto operativo agregado a la lista.");
-    
-    await page.waitForTimeout(500);
-    
-    // Submit!
-    console.log("Enviando transacciones al servidor de Google...");
-    await page.click('#btn-submit-expenses');
-    
-    console.log("Esperando respuesta del servidor...");
-    for(let i=0; i<30; i++) {
-        if(resultDialog !== "") break;
-        await page.waitForTimeout(1000);
-    }
-    
-    console.log("RESULTADO FINAL:", resultDialog);
+}
 
-    await browser.close();
-})();
+runE2ETest();

@@ -59,6 +59,34 @@ function doPost(e) {
   try {
     const params = JSON.parse(e.postData.contents);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (params.type === 'test_fill') {
+      const sheet = ss.getSheetByName("COMPRAS_INSUMOS");
+      const lr = sheet.getLastRow();
+      let debugInfo = { lr: lr };
+      
+      if (lr > 2) {
+        const formulasR1C1 = sheet.getRange(lr - 1, 1, 1, sheet.getLastColumn()).getFormulasR1C1()[0];
+        const formulasA1 = sheet.getRange(lr - 1, 1, 1, sheet.getLastColumn()).getFormulas()[0];
+        debugInfo.formulasR1C1 = formulasR1C1;
+        debugInfo.formulasA1 = formulasA1;
+        
+        try {
+          // Intentar forzar la escritura manual en la última fila
+          let wrote = [];
+          formulasR1C1.forEach((f, i) => {
+            if (f) {
+              sheet.getRange(lr, i + 1).setFormulaR1C1(f);
+              wrote.push({ col: i + 1, f: f });
+            }
+          });
+          debugInfo.wrote = wrote;
+        } catch (e) {
+          debugInfo.error = e.toString();
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify(debugInfo)).setMimeType(ContentService.MimeType.JSON);
+    }
+
     
     // Función auxiliar para copiar fórmulas de la fila anterior
     const fillFormulas = (sheet) => {
@@ -79,23 +107,42 @@ function doPost(e) {
       const sheetCompras = ss.getSheetByName("COMPRAS_INSUMOS");
       
       const items = JSON.parse(params.items);
-      let updatedGastos = false;
-      let updatedCompras = false;
+      let gastosAppended = 0;
+      let comprasAppended = 0;
+      
+      let startLrGastos = sheetGastos.getLastRow();
+      let startLrCompras = sheetCompras.getLastRow();
       
       items.forEach(item => {
         if (item.type === 'expense') {
-          // ["", Fecha, Categoría, Descripción, Valor, Método Pago, "1"]
-          sheetGastos.appendRow(["", item.fecha, item.categoria, item.descripcion, item.valor, item.pago, "1"]);
-          updatedGastos = true;
+          sheetGastos.appendRow(["", item.fecha, item.categoria, item.descripcion, item.valor, item.pago, item.comentarios || item.comentario || ""]);
+          gastosAppended++;
         } else if (item.type === 'purchase') {
-          // ["", Fecha, Categoría, Insumo, Cantidad, Costo Unitario, Costo Total, Método Pago, Comentarios]
-          sheetCompras.appendRow(["", item.fecha, item.insumo, "", "", item.cantidad, item.costoUnit, item.costoTotal, item.pago, item.comentario]);
-          updatedCompras = true;
+          sheetCompras.appendRow(["", item.fecha, item.insumo, "", "", item.cantidad, item.costoUnit, item.costoTotal, item.pago, item.comentarios || item.comentario || ""]);
+          comprasAppended++;
         }
       });
       
-      if (updatedGastos) fillFormulas(sheetGastos);
-      if (updatedCompras) fillFormulas(sheetCompras);
+      SpreadsheetApp.flush(); // Force write to get accurate last row
+      
+      const batchFillFormulas = (sheet, startLr, numAppended) => {
+          if (numAppended === 0 || startLr < 2) return;
+          
+          // Usamos getFormulas() para detectar qué columnas tienen fórmula
+          const formulas = sheet.getRange(startLr, 1, 1, sheet.getLastColumn()).getFormulas()[0];
+          
+          formulas.forEach((f, i) => {
+              if (f) {
+                  // Copiar usando copyTo preserva las Tablas (Structured References) y actualiza filas relativas
+                  const sourceCell = sheet.getRange(startLr, i + 1);
+                  const destRange = sheet.getRange(startLr + 1, i + 1, numAppended, 1);
+                  sourceCell.copyTo(destRange, SpreadsheetApp.CopyPasteType.PASTE_FORMULA, false);
+              }
+          });
+      };
+      
+      batchFillFormulas(sheetGastos, startLrGastos, gastosAppended);
+      batchFillFormulas(sheetCompras, startLrCompras, comprasAppended);
       
       return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
     }
