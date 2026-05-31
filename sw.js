@@ -2,7 +2,7 @@ const CACHE_NAME = 'sb-admin-cache-v3.1.2';
 const urlsToCache = [
   './',
   './index.html',
-  './style.css?v=1780182223.07113',
+  './style.css?v=1780185721.51866',
   './app.js?v=1780184610.78067.98618.10446.72483',
   './SB_V.1.ico',
   './manifest.json',
