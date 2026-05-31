@@ -345,24 +345,17 @@
         <div class="pos-cart pos-cart-box form-scrollable" style="flex: 1 1 100%; max-width: 100%; padding: 20px; box-sizing: border-box;">
             
             <!-- FECHA GLOBAL -->
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label style="font-weight: bold; color: var(--text-main);">Fecha de Registro</label>
-                <input type="date" id="global-fecha" class="pos-input" required>
+            <div class="pos-header pos-header-row" style="flex-direction: column; align-items: stretch; gap: 0.5rem; margin-bottom: 1rem;">
+                <label style="display:block; color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Fecha del Registro:</label>
+                <input type="date" id="global-fecha" class="pos-input" style="width: 100%;" required>
             </div>
 
+            <div class="cart-separator" style="border-top: 2px dashed var(--border-light); margin: 15px 0;"></div>
+
             <!-- LISTA DE AGREGADOS -->
-            <div class="pos-header pos-header-row" style="margin-bottom: 10px;">
-                <h3>Registros Agregados</h3>
-            </div>
             <ul id="expense-cart-list" class="cart-items cart-items-container" style="max-height: 250px; overflow-y: auto; padding: 0; margin: 0; list-style: none;">
                 <div class="empty-text-state">Sin registros listados</div>
             </ul>
-            <div class="pos-totals" style="padding: 10px 0;">
-                <div class="totals-row total" style="font-size: 1rem; border: none; padding: 0;">
-                    <span style="color: var(--text-light);">Subtotal Lista</span>
-                    <span id="expense-cart-total" style="color: var(--primary);">$0</span>
-                </div>
-            </div>
             
             <div class="cart-separator" style="border-top: 2px dashed var(--border-light); margin: 20px 0;"></div>
 
@@ -408,20 +401,25 @@
 
             <div class="cart-separator" style="border-top: 1px solid var(--border-light); margin: 20px 0;"></div>
 
-            <!-- GLOBAL FIELDS -->
-            <div class="form-group">
-                <label>Método de Pago General</label>
-                <select id="global-pago" class="pos-select">
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Transferencia">Transferencia</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Comentario General (Opcional)</label>
-                <input type="text" id="global-comentario" class="pos-input" placeholder="Aplica para todos los registros del lote">
-            </div>
+            <!-- TOTAL, METODO PAGO, COMENTARIO -->
+            <div class="pos-totals" style="padding-bottom: 15px;">
+                <div class="totals-row total" style="margin-bottom: 20px;">
+                    <span>Total</span>
+                    <span id="expense-cart-total">$0</span>
+                </div>
 
-            <div class="pos-totals" style="margin-top: 20px;">
+                <div class="form-group">
+                    <label>Método de Pago General</label>
+                    <div class="pos-payment radio-group" style="margin-top: 5px;">
+                        <label class="radio-label"><input type="radio" name="global-pago" value="Efectivo" checked> Efectivo</label>
+                        <label class="radio-label"><input type="radio" name="global-pago" value="Transferencia"> Transferencia</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Comentario General (Opcional)</label>
+                    <input type="text" id="global-comentario" class="pos-input" placeholder="Aplica para todos los registros del lote">
+                </div>
+
                 <button type="button" class="btn-primary" id="btn-submit-expenses" style="width: 100%; margin-top: 15px; background: var(--success); font-size: 1.1rem; padding: 15px;"><i data-lucide="save"></i> Registrar Todo</button>
             </div>
         </div>

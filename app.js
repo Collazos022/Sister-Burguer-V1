@@ -1625,7 +1625,7 @@ function renderExpenseCart() {
     if(!list) return;
     
     if(expenseCart.length === 0) {
-        list.innerHTML = '<div class="empty-text-state" style="font-size: 0.8rem;">Sin registros listados</div>';
+        list.innerHTML = '<div class="empty-text-state">Sin registros listados</div>';
         if(totalEl) totalEl.textContent = '$0';
         return;
     }
@@ -1634,7 +1634,8 @@ function renderExpenseCart() {
     let grandTotal = 0;
     
     expenseCart.forEach((item, index) => {
-        let title = item.type === 'gasto' ? `${item.categoria} - ${item.descripcion}` : `${item.categoria} - ${item.insumo} (${item.cantidad} ${item.unidad})`;
+        let title = item.type === 'gasto' ? `${item.descripcion}` : `${item.insumo}`;
+        let desc = item.type === 'gasto' ? item.categoria : `${item.cantidad} ${item.unidad}`;
         let price = item.type === 'gasto' ? item.valor : item.costoTotal;
         grandTotal += price;
         
@@ -1643,10 +1644,10 @@ function renderExpenseCart() {
         li.innerHTML = `
             <div class="cart-item-details">
                 <span class="cart-item-name">${title}</span>
-                <span class="cart-item-notes" style="color: var(--primary);">${item.type === 'gasto' ? 'Gasto Operativo' : 'Compra de Insumo'}</span>
+                <span class="cart-item-notes">${desc}</span>
             </div>
             <div class="cart-item-price">$${price.toLocaleString('es-CO')}</div>
-            <button type="button" class="btn-remove" onclick="removeExpenseFromCart(${index})"><i data-lucide="x"></i></button>
+            <button type="button" class="btn-remove" onclick="removeExpenseFromCart(${index})"><i data-lucide="trash-2"></i></button>
         `;
         list.appendChild(li);
     });
@@ -1747,7 +1748,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const globalFecha = document.getElementById('global-fecha').value;
-        const globalPago = document.getElementById('global-pago').value;
+        const globalPago = document.querySelector('input[name="global-pago"]:checked') ? document.querySelector('input[name="global-pago"]:checked').value : 'Efectivo';
         const globalComentario = document.getElementById('global-comentario').value || '';
         
         if (!globalFecha) {
