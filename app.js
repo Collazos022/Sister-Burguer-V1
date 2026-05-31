@@ -792,9 +792,9 @@ function updateDashboard() {
 
     const kpiValues = document.querySelectorAll('.kpi-card .value');
     if(kpiValues.length >= 3) {
-        kpiValues[0].textContent = '$' + totalVentas.toLocaleString();
-        kpiValues[1].textContent = '$' + totalGastos.toLocaleString();
-        kpiValues[2].textContent = '$' + (totalVentas - totalGastos).toLocaleString();
+        kpiValues[0].textContent = '$' + Math.round(totalVentas).toLocaleString('es-CO');
+        kpiValues[1].textContent = '$' + Math.round(totalGastos).toLocaleString('es-CO');
+        kpiValues[2].textContent = '$' + Math.round(totalVentas - totalGastos).toLocaleString('es-CO');
     }
 
     const updateTrend = (index, current, previous) => {
@@ -923,8 +923,10 @@ function updateDashboard() {
             saldoNeq = Number(rowFlujo['Digital Nequi'] || 0);
         }
 
-        saldoEfectivoEl.textContent = '$' + saldoEfe.toLocaleString();
-        saldoNequiEl.textContent = '$' + saldoNeq.toLocaleString();
+        if (saldoEfectivoEl && saldoNequiEl) {
+            saldoEfectivoEl.textContent = '$' + Math.round(saldoEfe).toLocaleString('es-CO');
+            saldoNequiEl.textContent = '$' + Math.round(saldoNeq).toLocaleString('es-CO');
+        }
     }
 
     populateSecondaryViews(startDate, endDate);
