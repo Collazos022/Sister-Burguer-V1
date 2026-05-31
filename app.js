@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const globalFechaInput = document.getElementById('global-fecha');
     if (globalFechaInput && !globalFechaInput.value) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalDateStr();
         globalFechaInput.value = today;
     }
     const toggleFormType = () => {
