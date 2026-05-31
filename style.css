@@ -1345,15 +1345,17 @@ button:disabled {
     box-sizing: border-box;
 }
 .pos-payment.radio-group, .pos-actions-row { 
-    width: 100% !important; 
-    display: flex !important; 
-    gap: 10px !important; 
+    width: 100%; 
+    display: flex; 
+    gap: 10px; 
 }
 .pos-payment.radio-group .radio-label, .pos-actions-row .btn-pos-action { 
-    flex: 1 1 0% !important; 
-    width: 100% !important; 
-    min-width: 0 !important; 
-    text-align: center !important; 
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    flex: 1 1 0%; 
+    min-width: 0; 
+    text-align: center; 
+    padding: 12px 5px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
