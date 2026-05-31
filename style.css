@@ -1356,3 +1356,24 @@ button:disabled {
     padding: 12px 5px;
     font-size: 0.9rem;
 }
+/* Refactored inline styles to utility classes */
+.pos-container { display: flex; gap: 20px; flex-wrap: wrap; padding: 20px; }
+.form-label { display: block; color: var(--text-light); font-size: 0.9rem; font-weight: 500; }
+.pos-header-row { flex-direction: column; align-items: stretch; gap: 0.5rem; margin-bottom: 1rem; }
+.flex-row-gap { display: flex; gap: 1rem; width: 100%; }
+.cart-separator-dashed { border-top: 2px dashed var(--border-light); margin: 15px 0; border-bottom: none; height: auto; }
+.cart-separator-solid { border-top: 1px solid var(--border-light); margin: 20px 0; border-bottom: none; height: auto; }
+.mt-0 { margin-top: 0; }
+.mt-2 { margin-top: 10px; }
+.mb-1 { margin-bottom: 5px; }
+.mb-3 { margin-bottom: 15px; }
+.mb-4 { margin-bottom: 20px; }
+.w-full { width: 100%; }
+.form-scrollable-register { flex: 1 1 100%; max-width: 100%; padding: 20px; box-sizing: border-box; }
+.expense-cart-list-style { max-height: 250px; overflow-y: auto; padding: 0; margin: 0; list-style: none; }
+.flex-1 { flex: 1; }
+.bg-body { background: var(--bg-body); }
+.costo-total-style { font-weight: bold; color: var(--primary); background: var(--bg-body); }
+.btn-submit-expenses-style { width: 100%; margin-top: 15px; background: var(--success); font-size: 1.1rem; padding: 15px; }
+.btn-add-expense-style { padding: 10px 20px; font-size: 0.9rem; border-radius: 8px; }
+.flex-end { display: flex; justify-content: flex-end; }

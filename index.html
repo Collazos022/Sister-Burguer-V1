@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1780187691.96024">
+    <link rel="stylesheet" href="style.css?v=1780187898.76802">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -227,11 +227,11 @@
                 </section>
 
                 <section class="dashboard-view" id="pos" style="display: none;">
-                    <div class="pos-container" style="display: flex; gap: 20px; flex-wrap: wrap; padding: 20px;">
+                    <div class="pos-container">
                         <div class="pos-cart pos-cart-box">
-                            <div class="pos-header pos-header-row" style="flex-direction: column; align-items: stretch; gap: 0.5rem; margin-bottom: 1rem;">
-                                <label style="display:block; color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Destino:</label>
-                                <div style="display:flex; gap: 1rem; width: 100%;">
+                            <div class="pos-header pos-header-row">
+                                <label class="form-label">Destino:</label>
+                                <div class="flex-row-gap">
                                     <div class="pos-selector pos-flex-1">
                                         <select id="pos-destino" class="pos-select">
                                             <option value="" disabled selected>Selecciona destino...</option>
@@ -275,15 +275,15 @@
                                 </div>
                             </div>
 
-                            <div class="cart-separator" style="border-top: 2px dashed var(--border-light); margin: 15px 0;"></div>
+                            <div class="cart-separator cart-separator cart-separator-dashed"></div>
 
-                            <div class="pos-footer pos-footer-box" style="margin-top: 0;">
+                            <div class="pos-footer pos-footer-box mt-0">
                                 <div class="pos-total-row pos-total-row-styled">
                                     <span>Total del Pedido</span>
                                     <span id="pos-total-price" class="pos-total-price-styled">$0</span>
                                 </div>
-                                <div style="margin-top: 10px; margin-bottom: 5px;">
-                                    <label style="display:block; color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Método de Pago</label>
+                                <div class="mt-2 mb-1">
+                                    <label class="form-label">Método de Pago</label>
                                 </div>
                                 <div class="pos-payment radio-group">
                                 <label class="radio-label"><input type="radio" name="pos-pago" value="Efectivo" checked> Efectivo</label>
@@ -364,18 +364,18 @@
         
                 <section class="dashboard-view" id="register" style="display: none;">
     <div class="pos-container">
-        <div class="pos-cart pos-cart-box form-scrollable" style="flex: 1 1 100%; max-width: 100%; padding: 20px; box-sizing: border-box;">
+        <div class="pos-cart pos-cart-box form-scrollable form-scrollable-register">
             
             <!-- FECHA GLOBAL -->
-            <div class="pos-header pos-header-row" style="flex-direction: column; align-items: stretch; gap: 0.5rem; margin-bottom: 1rem;">
-                <label style="display:block; color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Fecha del Registro:</label>
-                <input type="date" id="global-fecha" class="pos-input" style="width: 100%;" required>
+            <div class="pos-header pos-header-row">
+                <label class="form-label">Fecha del Registro:</label>
+                <input type="date" id="global-fecha" class="pos-input w-full" required>
             </div>
 
-            <div class="cart-separator" style="border-top: 2px dashed var(--border-light); margin: 15px 0;"></div>
+            <div class="cart-separator cart-separator cart-separator-dashed"></div>
 
             <!-- LISTA DE AGREGADOS -->
-            <ul id="expense-cart-list" class="cart-items cart-items-container" style="max-height: 250px; overflow-y: auto; padding: 0; margin: 0; list-style: none;">
+            <ul id="expense-cart-list" class="cart-items cart-items-container expense-cart-list-style">
                 <div class="empty-text-state">Sin registros listados</div>
             </ul>
             
@@ -408,32 +408,32 @@
                     <div class="form-group"><label>Categoría</label><select id="exp-cat-compra" class="pos-select"><option value="">Cargando...</option></select></div>
                     <div class="form-group"><label>Insumo</label><select id="exp-insumo" class="pos-select"><option value="">Seleccione Categoría primero</option></select></div>
                     <div style="display:flex; gap:10px;">
-                        <div class="form-group" style="flex:1"><label>Unidades</label><input type="text" id="exp-unidades" class="pos-input" readonly disabled style="background: var(--bg-body);"></div>
-                        <div class="form-group" style="flex:1"><label>Cantidad</label><input type="number" id="exp-cantidad" class="pos-input" step="0.01"></div>
+                        <div class="form-group flex-1"><label>Unidades</label><input type="text" id="exp-unidades" class="pos-input" readonly disabled class="bg-body"></div>
+                        <div class="form-group flex-1"><label>Cantidad</label><input type="number" id="exp-cantidad" class="pos-input" step="0.01"></div>
                     </div>
                     <div style="display:flex; gap:10px;">
-                        <div class="form-group" style="flex:1"><label>Costo Unit. ($)</label><input type="number" id="exp-costo-unitario" class="pos-input"></div>
-                        <div class="form-group" style="flex:1"><label>Costo Total ($)</label><input type="number" id="exp-costo-total" class="pos-input" readonly disabled style="font-weight:bold; color:var(--primary); background: var(--bg-body);"></div>
+                        <div class="form-group flex-1"><label>Costo Unit. ($)</label><input type="number" id="exp-costo-unitario" class="pos-input"></div>
+                        <div class="form-group flex-1"><label>Costo Total ($)</label><input type="number" id="exp-costo-total" class="pos-input" readonly disabled class="costo-total-style"></div>
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: flex-end;">
-                    <button type="submit" class="btn-primary" id="btn-add-expense" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 8px;"><i data-lucide="plus"></i> Agregar</button>
+                <div class="flex-end">
+                    <button type="submit" class="btn-primary" id="btn-add-expense" class="btn-add-expense-style"><i data-lucide="plus"></i> Agregar</button>
                 </div>
             </form>
 
-            <div class="cart-separator" style="border-top: 1px solid var(--border-light); margin: 20px 0;"></div>
+            <div class="cart-separator cart-separator cart-separator-solid"></div>
 
             <!-- TOTAL, METODO PAGO, COMENTARIO -->
-            <div class="pos-totals" style="padding-bottom: 15px;">
-                <div class="pos-total-row pos-total-row-styled" style="margin-bottom: 20px;">
+            <div class="pos-totals mb-3">
+                <div class="pos-total-row pos-total-row-styled mb-4">
                     <span>Total del Registro</span>
                     <span id="expense-cart-total" class="pos-total-price-styled">$0</span>
                 </div>
 
                 <div class="form-group">
                     <label>Método de Pago</label>
-                    <div class="pos-payment radio-group" style="margin-top: 5px;">
+                    <div class="pos-payment radio-group mt-1">
                         <label class="radio-label"><input type="radio" name="global-pago" value="Efectivo" checked> Efectivo</label>
                         <label class="radio-label"><input type="radio" name="global-pago" value="Transferencia"> Transferencia</label>
                     </div>
@@ -443,7 +443,7 @@
                     <input type="text" id="global-comentario" class="pos-input" placeholder="Aplica para todos los registros del lote">
                 </div>
 
-                <button type="button" class="btn-primary" id="btn-submit-expenses" style="width: 100%; margin-top: 15px; background: var(--success); font-size: 1.1rem; padding: 15px;"><i data-lucide="save"></i> Registrar Todo</button>
+                <button type="button" class="btn-primary" id="btn-submit-expenses" class="btn-submit-expenses-style"><i data-lucide="save"></i> Registrar Todo</button>
             </div>
         </div>
     </div>
@@ -455,3 +455,4 @@
 </body>
 
 </html>
+
