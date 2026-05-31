@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             navItems.forEach(n => n.classList.toggle('active', n === item));
             views.forEach(v => {
                 if (v.id === tabId) {
-                    v.style.display = (tabId === 'register') ? 'flex' : 'block';
+                    v.style.display = 'block';
                 } else {
                     v.style.display = 'none';
                 }

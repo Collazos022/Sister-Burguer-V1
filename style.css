@@ -1324,3 +1324,23 @@ button:disabled {
     color: #000 !important;
     border-color: #FFD700 !important;
 }
+
+/* Fix for horizontal scroll and layout on mobile register view */
+#register {
+    display: block !important;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto; /* Ensure it scrolls */
+}
+#register .pos-container {
+    display: block !important; /* Stack vertically */
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+}
+#register .form-scrollable {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    box-sizing: border-box;
+}
