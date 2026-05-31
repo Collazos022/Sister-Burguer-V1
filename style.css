@@ -1281,3 +1281,21 @@ button:disabled {
     border-bottom: 1px dashed var(--border-input);
     margin: 15px 0;
 }
+
+/* Responsive styling for Register view */
+@media (max-width: 768px) {
+    #register .pos-container {
+        flex-direction: column !important;
+        height: auto !important;
+        overflow-y: visible !important;
+    }
+    #register .form-scrollable {
+        flex: none !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    #register .pos-cart {
+        height: auto !important;
+        max-height: none !important;
+    }
+}

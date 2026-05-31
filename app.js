@@ -52,29 +52,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     lucide.createIcons();
     
+    
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const tabId = item.getAttribute('data-tab');
             
             navItems.forEach(n => n.classList.toggle('active', n === item));
-            views.forEach(v => v.style.display = v.id === tabId ? 'block' : 'none');
+            views.forEach(v => {
+                if (v.id === tabId) {
+                    v.style.display = (tabId === 'register') ? 'flex' : 'block';
+                } else {
+                    v.style.display = 'none';
+                }
+            });
             
             const periodFilters = document.getElementById('period-filters');
             const dateControls = document.querySelector('.date-controls');
             const posOrderWrapper = document.getElementById('pos-order-wrapper');
+            const registerWrapper = document.getElementById('register-type-wrapper');
             
-            if (tabId === 'pos' || tabId === 'cocina') {
+            if (tabId === 'pos' || tabId === 'cocina' || tabId === 'register') {
                 if(periodFilters) periodFilters.style.display = 'none';
                 if(dateControls) dateControls.style.display = 'none';
-                if(posOrderWrapper) posOrderWrapper.style.display = 'flex';
+                
+                if (tabId === 'pos') {
+                    if(posOrderWrapper) posOrderWrapper.style.display = 'flex';
+                    if(registerWrapper) registerWrapper.style.display = 'none';
+                } else if (tabId === 'register') {
+                    if(posOrderWrapper) posOrderWrapper.style.display = 'none';
+                    if(registerWrapper) registerWrapper.style.display = 'flex';
+                } else {
+                    if(posOrderWrapper) posOrderWrapper.style.display = 'none';
+                    if(registerWrapper) registerWrapper.style.display = 'none';
+                }
             } else {
                 if(periodFilters) periodFilters.style.display = 'flex';
                 if(dateControls) dateControls.style.display = 'flex';
                 if(posOrderWrapper) posOrderWrapper.style.display = 'none';
+                if(registerWrapper) registerWrapper.style.display = 'none';
             }
-            
-            const titles = {
+const titles = {
                 'dashboard': 'Resumen Financiero',
                 'sales': 'Historial de Ventas',
                 'expenses': 'Gastos y Compras',

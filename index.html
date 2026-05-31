@@ -109,6 +109,12 @@
                             </div>
                             <button class="scroll-arrow" id="scroll-right" style="display: none;"><i data-lucide="chevron-right"></i></button>
                         </div>
+                        <div class="pos-order-wrapper" id="register-type-wrapper" style="display: none;">
+                            <div class="pos-order-bar" id="register-type-bar">
+                                <button class="order-pill active" id="btn-tab-purchase">Compras Insumos</button>
+                                <button class="order-pill" id="btn-tab-expense">Gastos de Operación</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -204,7 +210,7 @@
                 </section>
 
                 <section class="dashboard-view" id="pos" style="display: none;">
-                    <div class="pos-container">
+                    <div class="pos-container" style="height: 100%; display: flex; gap: 20px;">
                         <div class="pos-cart pos-cart-box">
                             <div class="pos-header pos-header-row" style="flex-direction: column; align-items: stretch; gap: 0.5rem; margin-bottom: 1rem;">
                                 <label style="display:block; color: var(--text-light); font-size: 0.9rem; font-weight: 500;">Destino:</label>
@@ -334,23 +340,15 @@
                 </section>
             </div>
         
-                <section class="dashboard-view" id="register" style="display: none;">
+                <section class="dashboard-view" id="register" style="display: none; height: 100%; overflow: hidden;">
                     <div class="pos-container">
                         <!-- PANEL IZQUIERDO: FORMULARIO -->
-                        <div class="pos-cart pos-cart-box" style="flex: 1.5; padding: 20px; overflow-y: auto;">
+                        <div class="pos-cart pos-cart-box form-scrollable" style="flex: 1.5; padding: 20px; overflow-y: auto; display: flex; flex-direction: column;">
                             <h2 style="margin-bottom: 20px;">Registrar Compra / Gasto</h2>
                             
                             <form id="entry-form">
-                                <div class="form-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
-                                    <label class="tab-option">
-                                        <input type="radio" name="entry-type" value="purchase" checked>
-                                        <span>Compra Insumo</span>
-                                    </label>
-                                    <label class="tab-option">
-                                        <input type="radio" name="entry-type" value="expense">
-                                        <span>Gasto Operativo</span>
-                                    </label>
-                                </div>
+<div style="display:none;"><input type="radio" id="radio-compra-hidden" name="entry-type" value="purchase" checked><input type="radio" id="radio-gasto-hidden" name="entry-type" value="expense"></div>
+                                
 
                                 <div class="form-body" id="form-gasto" style="display: none;">
                                     <div class="form-group"><label>Fecha</label><input type="date" id="exp-fecha-gasto" class="pos-input" required></div>

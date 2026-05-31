@@ -5,11 +5,11 @@ const { chromium } = require('playwright');
     const page = await browser.newPage();
     
     page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
+    page.on('pageerror', err => console.log('PAGE ERROR:', err));
     
     console.log("Navegando a localhost:3000...");
     await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
     
-    // Switch to Register view
     console.log("Navegando a la vista Registrar...");
     await page.click('a[data-tab="register"]');
     await page.waitForTimeout(1000);
@@ -20,8 +20,8 @@ const { chromium } = require('playwright');
         return select && select.options.length > 1;
     }, { timeout: 15000 });
     
-    // 1. Agregar Compra de Insumo
-    await page.check('input[value="purchase"]');
+    // 1. Agregar Compra de Insumo (Click on header tab)
+    await page.click('#btn-tab-purchase');
     await page.selectOption('#exp-cat-compra', { index: 1 });
     await page.waitForTimeout(500);
     await page.selectOption('#exp-insumo', { index: 1 });
@@ -31,14 +31,13 @@ const { chromium } = require('playwright');
     await page.fill('#exp-costo-unitario', '1200');
     await page.fill('#exp-comentarios-compra', 'Proveedor XYZ');
     
-    // Using evaluate for the add button to bypass any viewport issues
     await page.evaluate(() => document.getElementById('btn-add-expense').click());
     console.log("=> Compra de insumo agregada a la lista.");
     await page.waitForTimeout(500);
     
-    // 2. Agregar Gasto Operativo
+    // 2. Agregar Gasto Operativo (Click on header tab)
     console.log("Cambiando a Gasto Operativo...");
-    await page.check('input[value="expense"]');
+    await page.click('#btn-tab-expense');
     await page.waitForTimeout(500);
     
     await page.selectOption('#exp-cat-gasto', 'Servicios Públicos');
@@ -50,7 +49,6 @@ const { chromium } = require('playwright');
     console.log("=> Gasto operativo agregado a la lista.");
     await page.waitForTimeout(500);
     
-    // Setup dialog listener to capture the final success alert
     let resultDialog = "";
     page.on('dialog', async dialog => {
         resultDialog = dialog.message();
@@ -58,11 +56,9 @@ const { chromium } = require('playwright');
         await dialog.accept();
     });
     
-    // Submit!
-    console.log("Enviando transacciones al servidor de Google desde el modal...");
+    console.log("Enviando transacciones al servidor de Google...");
     await page.evaluate(() => document.getElementById('btn-submit-expenses').click());
     
-    console.log("Esperando respuesta del servidor...");
     for(let i=0; i<30; i++) {
         if(resultDialog !== "") break;
         await page.waitForTimeout(1000);
