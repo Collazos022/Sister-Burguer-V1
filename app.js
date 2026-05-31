@@ -1813,7 +1813,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Transacciones registradas exitosamente!");
                 expenseCart = [];
                 renderExpenseCart();
-                
+                document.getElementById('global-comentario').value = '';
                 fetchData();
             } else {
                 alert("Error: " + data.message);
