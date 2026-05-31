@@ -80,7 +80,9 @@ body {
 .app-layout {
     display: flex;
     height: 100vh;
+    height: 100dvh; /* Fixes mobile address bar cutoff */
     width: 100vw;
+    overflow: hidden;
 }
 
 .sidebar {
@@ -605,6 +607,12 @@ body {
     z-index: 1000;
 }
 
+.dashboard-view {
+    flex: 1;
+    overflow-y: auto;
+    height: 100%;
+}
+
 .modal-overlay.active {
     display: flex;
 }
@@ -842,7 +850,8 @@ body {
     
     
     
-    .main-container { padding: 0; padding-bottom: 90px; }
+    .main-container { padding: 0; }
+    .dashboard-view { padding-bottom: 90px; }
     .top-bar { padding: 0.5rem; }
     .content-scroll { padding: 0.5rem; }
     
@@ -1113,7 +1122,7 @@ button:disabled {
 }
 .pos-flex-1 { flex: 1; }
 .pos-flex-2 { flex: 2; }
-.pos-cart-box { flex: 1 1 350px; max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: 12px; padding: 15px; border: 1px solid var(--border-input); min-width: 0; }
+.pos-cart-box { width: 100%; flex: 1; max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: 12px; padding: 15px; border: 1px solid var(--border-input); min-width: 0; }
 .cart-items-container {
     display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;
 }
