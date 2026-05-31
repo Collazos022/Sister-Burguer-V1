@@ -92,15 +92,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(posOrderWrapper) posOrderWrapper.style.display = 'none';
                 if(registerWrapper) registerWrapper.style.display = 'none';
             }
-const titles = {
+            const titles = {
                 'dashboard': 'Resumen Financiero',
                 'sales': 'Historial de Ventas',
                 'expenses': 'Gastos y Compras',
                 'inventory': 'Alerta de Inventario',
                 'pos': 'Punto de Venta',
-                'cocina': 'Cocina'
+                'cocina': 'Cocina',
+                'register': 'Registrar Gasto'
             };
-            mainTitle.textContent = titles[tabId] || 'Panel Administrativo';
+            mainTitle.textContent = titles[tabId] || 'Registrar Gasto';
         });
     });
 
@@ -702,7 +703,7 @@ function updateDashboard() {
             let isBebida = false;
             if (dbData.menu) {
                 let menuItem = dbData.menu.find(m => m.nombre === plato);
-                if(menuItem && menuItem.categoria && String(menuItem.categoria).trim().toLowerCase() === 'bebidas') {
+                if(menuItem && menuItem.categoria && String(menuItem.categoria).trim().toLowerCase().includes('bebida')) {
                     isBebida = true;
                 }
             }
@@ -1730,11 +1731,15 @@ function populateExpenseDropdowns() {
     
     if (!catSelect || !insumoSelect || !unitInput) return;
     
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateStr();
     const fechaC = document.getElementById('exp-fecha-compra');
     const fechaG = document.getElementById('exp-fecha-gasto');
     if(fechaC && !fechaC.value) fechaC.value = today;
     if(fechaG && !fechaG.value) fechaG.value = today;
+    
+    // Set global date input default
+    const globalFecha = document.getElementById('global-fecha');
+    if(globalFecha && !globalFecha.value) globalFecha.value = today;
 
     const categories = [...new Set(dbData.inventario.map(i => i['Categoría'] || i.Categoria || 'Otros'))];
     
