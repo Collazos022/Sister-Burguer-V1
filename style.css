@@ -1308,3 +1308,19 @@ button:disabled {
 #register .pos-container {
     padding: 0 !important;
 }
+
+/* Register Header optimizations */
+#register-type-wrapper {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Hide scrollbar for cleaner look */
+}
+#register-type-wrapper::-webkit-scrollbar {
+    display: none;
+}
+#register-type-bar .order-pill.active {
+    background: #FFD700 !important; /* Yellow */
+    color: #000 !important;
+    border-color: #FFD700 !important;
+}

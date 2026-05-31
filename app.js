@@ -1807,7 +1807,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnTabExpense.classList.remove('active');
             if(hiddenCompra) hiddenCompra.checked = true;
             if(hiddenGasto) hiddenGasto.checked = false;
-            if(mainTitle) mainTitle.textContent = 'Registrar Compras';
+            
             if (hiddenCompra) hiddenCompra.dispatchEvent(new Event('change'));
         });
         btnTabExpense.addEventListener('click', (e) => {
@@ -1816,7 +1816,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnTabPurchase.classList.remove('active');
             if(hiddenGasto) hiddenGasto.checked = true;
             if(hiddenCompra) hiddenCompra.checked = false;
-            if(mainTitle) mainTitle.textContent = 'Registrar Gastos';
+            
             if (hiddenGasto) hiddenGasto.dispatchEvent(new Event('change'));
         });
     }
