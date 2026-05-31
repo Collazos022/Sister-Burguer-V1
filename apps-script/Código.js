@@ -74,16 +74,29 @@ function doPost(e) {
     // -------------------------------------------------------------
     // REGISTRO SIMPLE (Formularios Antiguos)
     // -------------------------------------------------------------
-    if (params.type === 'expense') {
-      const sheet = ss.getSheetByName("GASTOS_OPERATIVOS");
-      sheet.appendRow(["", params.fecha, params.categoria, params.descripcion, params.valor, params.pago, "1"]);
-      fillFormulas(sheet);
-      return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
-    } 
-    else if (params.type === 'purchase') {
-      const sheet = ss.getSheetByName("COMPRAS_INSUMOS");
-      sheet.appendRow(["", params.fecha, params.proveedor || "", params.insumo, params.cantidad || 1, params.valor]);
-      fillFormulas(sheet);
+    if (params.type === 'batch_transactions') {
+      const sheetGastos = ss.getSheetByName("GASTOS_OPERATIVOS");
+      const sheetCompras = ss.getSheetByName("COMPRAS_INSUMOS");
+      
+      const items = JSON.parse(params.items);
+      let updatedGastos = false;
+      let updatedCompras = false;
+      
+      items.forEach(item => {
+        if (item.type === 'expense') {
+          // ["", Fecha, Categoría, Descripción, Valor, Método Pago, "1"]
+          sheetGastos.appendRow(["", item.fecha, item.categoria, item.descripcion, item.valor, item.pago, "1"]);
+          updatedGastos = true;
+        } else if (item.type === 'purchase') {
+          // ["", Fecha, Categoría, Insumo, Cantidad, Costo Unitario, Costo Total, Método Pago, Comentarios]
+          sheetCompras.appendRow(["", item.fecha, item.insumo, "", "", item.cantidad, item.costoUnit, item.costoTotal, item.pago, item.comentario]);
+          updatedCompras = true;
+        }
+      });
+      
+      if (updatedGastos) fillFormulas(sheetGastos);
+      if (updatedCompras) fillFormulas(sheetCompras);
+      
       return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
     }
 

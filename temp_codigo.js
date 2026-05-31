@@ -89,7 +89,7 @@ function doPost(e) {
           updatedGastos = true;
         } else if (item.type === 'purchase') {
           // ["", Fecha, Categoría, Insumo, Cantidad, Costo Unitario, Costo Total, Método Pago, Comentarios]
-          sheetCompras.appendRow(["", item.fecha, item.categoria, item.insumo, item.cantidad, item.costo_unitario, item.costo_total, item.pago, item.comentarios]);
+          sheetCompras.appendRow(["", item.fecha, item.insumo, "", "", item.cantidad, item.costoUnit, item.costoTotal, item.pago, item.comentario]);
           updatedCompras = true;
         }
       });

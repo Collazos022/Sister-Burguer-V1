@@ -1847,6 +1847,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (hiddenCompra) hiddenCompra.dispatchEvent(new Event('change'));
         });
+        // Force purchase as default on load
+        setTimeout(() => btnTabPurchase.click(), 50);
+        
         btnTabExpense.addEventListener('click', (e) => {
             e.preventDefault();
             btnTabExpense.classList.add('active');
