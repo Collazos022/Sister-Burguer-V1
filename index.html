@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1780187898.76802">
+    <link rel="stylesheet" href="style.css?v=1780188212.32946">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -422,28 +422,31 @@
                 </div>
             </form>
 
-            <div class="cart-separator cart-separator cart-separator-solid"></div>
+            <div class="cart-separator cart-separator-solid"></div>
 
             <!-- TOTAL, METODO PAGO, COMENTARIO -->
-            <div class="pos-totals mb-3">
-                <div class="pos-total-row pos-total-row-styled mb-4">
+            <div class="pos-footer pos-footer-box mt-0">
+                <div class="pos-total-row pos-total-row-styled">
                     <span>Total del Registro</span>
                     <span id="expense-cart-total" class="pos-total-price-styled">$0</span>
                 </div>
-
-                <div class="form-group">
-                    <label>Método de Pago</label>
-                    <div class="pos-payment radio-group mt-1">
-                        <label class="radio-label"><input type="radio" name="global-pago" value="Efectivo" checked> Efectivo</label>
-                        <label class="radio-label"><input type="radio" name="global-pago" value="Transferencia"> Transferencia</label>
-                    </div>
+                
+                <div class="mt-2 mb-1">
+                    <label class="form-label">Método de Pago</label>
                 </div>
-                <div class="form-group">
-                    <label>Comentario</label>
-                    <input type="text" id="global-comentario" class="pos-input" placeholder="Aplica para todos los registros del lote">
+                <div class="pos-payment radio-group">
+                    <label class="radio-label"><input type="radio" name="global-pago" value="Efectivo" checked> Efectivo</label>
+                    <label class="radio-label"><input type="radio" name="global-pago" value="Transferencia"> Transferencia</label>
                 </div>
+                
+                <div class="mt-2 mb-1">
+                    <label class="form-label">Comentario</label>
+                </div>
+                <input type="text" id="global-comentario" class="pos-input w-full" placeholder="Aplica para todos los registros del lote">
 
-                <button type="button" class="btn-primary" id="btn-submit-expenses" class="btn-submit-expenses-style"><i data-lucide="save"></i> Registrar Todo</button>
+                <div class="pos-actions pos-actions-row">
+                    <button type="button" class="btn-primary btn-submit-expenses-style" id="btn-submit-expenses"><i data-lucide="save"></i> Registrar Todo</button>
+                </div>
             </div>
         </div>
     </div>
@@ -455,4 +458,5 @@
 </body>
 
 </html>
+
 
