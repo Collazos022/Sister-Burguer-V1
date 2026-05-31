@@ -5,9 +5,10 @@ let currentPeriod = 'dia';
 let expenseCart = [];
 
 const getLocalDateStr = (d = new Date()) => {
-    const offset = d.getTimezoneOffset();
-    const dLocal = new Date(d.getTime() - (offset*60*1000));
-    return dLocal.toISOString().split('T')[0];
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 if ('serviceWorker' in navigator) {
@@ -99,9 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 'inventory': 'Alerta de Inventario',
                 'pos': 'Punto de Venta',
                 'cocina': 'Cocina',
-                'register': 'Registrar Gasto'
+                'register': 'Registro de Gastos'
             };
-            mainTitle.textContent = titles[tabId] || 'Registrar Gasto';
+            mainTitle.textContent = titles[tabId] || 'Registro de Gastos';
         });
     });
 
@@ -542,6 +543,7 @@ function fetchData() {
                 dbData.compras = data.compras || [];
                 dbData.inventario = data.inventario || [];
                 dbData.menu = data.menu || [];
+                dbData.flujo = data.flujo || [];
                 
                 if (data.pedidos && Array.isArray(data.pedidos)) {
                     pedidosActivos = data.pedidos
