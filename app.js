@@ -41,13 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateInput = document.getElementById('analysis-date');
     const navItems = document.querySelectorAll('.nav-item[data-tab]');
     const views = document.querySelectorAll('.dashboard-view');
-    const modal = document.getElementById('entry-modal');
-    const entryForm = document.getElementById('entry-form');
-    const btnOpen = document.getElementById('btn-open-form');
-    const btnClose = document.getElementById('btn-close-modal');
-    const btnCancel = document.getElementById('btn-cancel');
-
-    const setDefaultDates = () => {
+        const entryForm = document.getElementById('entry-form');
+                const setDefaultDates = () => {
         const tStr = getLocalDateStr();
         ['v-date', 'g-date', 'c-date'].forEach(id => {
             const el = document.getElementById(id);
@@ -120,13 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDashboard();
     });
 
-    const toggleModal = () => modal.classList.toggle('active');
-
-    btnOpen.addEventListener('click', toggleModal);
-    btnClose.addEventListener('click', toggleModal);
-    btnCancel.addEventListener('click', toggleModal);
-
-    const radioVenta = document.querySelector('input[value="sale"]');
+                    const radioVenta = document.querySelector('input[value="sale"]');
     const radioGasto = document.querySelector('input[value="expense"]');
     const radioCompra = document.querySelector('input[value="purchase"]');
     const formVenta = document.getElementById('form-venta');
@@ -164,9 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
         inputs.forEach(input => input.required = isRequired);
     }
 
-    if(radioVenta) radioVenta.addEventListener('change', toggleFormType);
-    if(radioGasto) radioGasto.addEventListener('change', toggleFormType);
-    if(radioCompra) radioCompra.addEventListener('change', toggleFormType);
+    if(radioVenta) if(radioVenta) radioVenta.addEventListener('change', toggleFormType);
+    if(radioGasto) if(radioGasto) radioGasto.addEventListener('change', toggleFormType);
+    if(radioCompra) if(radioCompra) radioCompra.addEventListener('change', toggleFormType);
     toggleFormType();
     
     const periodButtons = document.querySelectorAll('#period-filters button');
@@ -1769,7 +1758,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Transacciones registradas exitosamente!");
                 expenseCart = [];
                 renderExpenseCart();
-                document.getElementById('btn-cancel').click();
+                
                 fetchData();
             } else {
                 alert("Error: " + data.message);
