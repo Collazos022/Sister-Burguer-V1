@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     /* Marca e Interfaz Principal */
     --primary: #FF0080;
     --accent: #FFD60A;
@@ -7,7 +7,7 @@
     --bg-sidebar: #121212;
     --accent-hover: #ffea00;
 
-    /* Colores Semánticos */
+    /* Colores SemÃ¡nticos */
     --success: #39FF14;
     --warning: #FFD60A;
     --danger: #9D4EDD;
@@ -17,7 +17,7 @@
     --bg-danger-subtle: rgba(255, 0, 128, 0.1);
     --bg-info-subtle: rgba(0, 209, 255, 0.1);
 
-    /* Tipografía y Diseño */
+    /* TipografÃ­a y DiseÃ±o */
     --text-main: #FFFFFF;
     --text-muted: #A0A0A0;
     --text-dim: rgba(255, 255, 255, 0.6);
@@ -44,7 +44,7 @@
     --glow-pink-strong: 0 4px 15px rgba(255, 0, 128, 0.3);
     --glow-yellow: 0 0 20px rgba(255, 214, 10, 0.4);
 
-    /* Categorías de Gráficas */
+    /* CategorÃ­as de GrÃ¡ficas */
     --cat-mobiliario: #0A53A8;
     --cat-arriendo: #FFD60A;
     --cat-servicios: #00D1FF;
@@ -1112,9 +1112,7 @@ button:disabled {
 }
 .pos-flex-1 { flex: 1; }
 .pos-flex-2 { flex: 2; }
-.pos-cart-box {
-    background: var(--bg-card); border-radius: 12px; padding: 15px; border: 1px solid var(--border-input);
-}
+.pos-cart-box { flex: 1 1 350px; background: var(--bg-card); border-radius: 12px; padding: 15px; border: 1px solid var(--border-input); min-width: 0; }
 .cart-items-container {
     display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;
 }
@@ -1366,3 +1364,4 @@ button:disabled {
 .btn-submit-expenses-style { width: 100%; margin-top: 15px; background: var(--success); font-size: 1.1rem; padding: 15px; }
 .btn-add-expense-style { padding: 10px 20px; font-size: 0.9rem; border-radius: 8px; }
 .flex-end { display: flex; justify-content: flex-end; }
+

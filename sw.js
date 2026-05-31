@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'sb-admin-cache-v3.1.3';
+﻿const CACHE_NAME = 'sb-admin-cache-v3.1.4';
 const urlsToCache = [
   './',
   './index.html',
@@ -61,3 +61,4 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
