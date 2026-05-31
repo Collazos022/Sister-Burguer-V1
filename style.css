@@ -1344,3 +1344,7 @@ button:disabled {
     flex: none !important;
     box-sizing: border-box;
 }
+.pos-payment.radio-group { width: 100%; display: flex; gap: 10px; }
+.pos-payment.radio-group .radio-label { flex: 1 1 0; }
+.pos-actions-row { width: 100%; display: flex; gap: 10px; }
+.pos-actions-row .btn-pos-action { flex: 1 1 0; }
