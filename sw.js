@@ -3,7 +3,7 @@ const urlsToCache = [
   './',
   './index.html',
   './style.css?v=1780185721.51866',
-  './app.js?v=1780186057.25734',
+  './app.js?v=1780186345.00527',
   './SB_V.1.ico',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap',

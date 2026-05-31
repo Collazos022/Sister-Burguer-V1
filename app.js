@@ -11,6 +11,18 @@ const getLocalDateStr = (d = new Date()) => {
     return `${year}-${month}-${day}`;
 };
 
+const formatToLocalSheetsDate = (isoDate) => {
+    if (!isoDate) return isoDate;
+    let dStr = String(isoDate);
+    if (dStr.includes('T')) dStr = dStr.split('T')[0];
+    if (!dStr.includes('-')) return dStr;
+    const parts = dStr.split('-');
+    if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dStr;
+};
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
@@ -1363,7 +1375,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = {
                 type: 'order',
                 id_pedido: nuevoPedido.id,
-                fecha: nuevoPedido.fecha.split('T')[0],
+                fecha: formatToLocalSheetsDate(nuevoPedido.fecha),
                 destino: destino,
                 nombre_cliente: cliente,
                 metodo_pago: metodoPago,
@@ -1478,7 +1490,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const payload = {
                     type: 'complete_order',
                     id_pedido: pedido.id,
-                    fecha: pedido.fecha || getLocalDateStr(),
+                    fecha: formatToLocalSheetsDate(pedido.fecha || getLocalDateStr()),
                     destino: pedido.destino,
                     metodo_pago: pedido.pago,
                     total: totalPedido,
@@ -1827,7 +1839,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const finalCart = expenseCart.map(item => {
             return {
                 ...item,
-                fecha: globalFecha,
+                fecha: formatToLocalSheetsDate(globalFecha),
                 pago: globalPago,
                 comentarios: globalComentario
             };
