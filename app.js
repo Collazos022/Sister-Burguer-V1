@@ -1634,20 +1634,41 @@ function renderExpenseCart() {
     let grandTotal = 0;
     
     expenseCart.forEach((item, index) => {
-        let title = item.type === 'gasto' ? `${item.descripcion}` : `${item.insumo}`;
-        let desc = item.type === 'gasto' ? item.categoria : `${item.cantidad} ${item.unidad}`;
+        let title, desc;
+        if (item.type === 'gasto') {
+            title = item.descripcion;
+            desc = item.categoria;
+        } else {
+            let unitAbrev = item.unidad;
+            if (item.unidad) {
+                const match = item.unidad.match(/\(([^)]+)\)/);
+                if (match) unitAbrev = match[1];
+            }
+            // Clean up the insumo name to remove the unit if it's there
+            let insumoClean = item.insumo;
+            if (insumoClean.includes('(')) {
+                insumoClean = insumoClean.split(/\s*\d+\s*[A-Za-z]+.*\(/)[0].trim();
+            }
+            
+            title = `${item.cantidad} ${unitAbrev} - ${item.insumo}`;
+            desc = ''; 
+        }
+        
         let price = item.type === 'gasto' ? item.valor : item.costoTotal;
         grandTotal += price;
         
         const li = document.createElement('li');
         li.className = 'cart-item';
+        
+        // Use cart-btn-remove to ensure it gets the transparent background and purple/red color
+        // And ensure layout is flex with cart-item-details taking up space
         li.innerHTML = `
-            <div class="cart-item-details">
-                <span class="cart-item-name">${title}</span>
-                <span class="cart-item-notes">${desc}</span>
+            <div class="cart-item-details" style="flex: 1;">
+                <span class="cart-item-name" style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">${title}</span>
+                ${desc ? `<span class="cart-item-notes" style="font-size: 0.8rem; color: var(--text-light);">${desc}</span>` : ''}
             </div>
-            <div class="cart-item-price">$${price.toLocaleString('es-CO')}</div>
-            <button type="button" class="btn-remove" onclick="removeExpenseFromCart(${index})"><i data-lucide="trash-2"></i></button>
+            <div class="cart-item-price" style="font-weight: bold; margin-right: 10px;">$${price.toLocaleString('es-CO')}</div>
+            <button type="button" class="cart-btn-remove" onclick="removeExpenseFromCart(${index})" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 5px;"><i data-lucide="trash-2"></i></button>
         `;
         list.appendChild(li);
     });
