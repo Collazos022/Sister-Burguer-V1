@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(periodFilters) periodFilters.style.display = 'none';
                 if(dateControls) dateControls.style.display = 'none';
                 
-                if (tabId === 'pos') {
+                if (tabId === 'pos' || tabId === 'cocina') {
                     if(posOrderWrapper) posOrderWrapper.style.display = 'flex';
                     if(registerWrapper) registerWrapper.style.display = 'none';
                 } else if (tabId === 'register') {
