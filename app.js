@@ -698,7 +698,17 @@ function updateDashboard() {
             numVentas += 1;
             let plato = v['Nombre Plato Ref'] || v.Plato || 'Desconocido';
             let cantidad = parseInt(v.Cantidad || v['Cantidad '] || 1);
-            platosVendidos[plato] = (platosVendidos[plato] || 0) + cantidad;
+            
+            let isBebida = false;
+            if (dbData.menu) {
+                let menuItem = dbData.menu.find(m => m.nombre === plato);
+                if(menuItem && menuItem.categoria && String(menuItem.categoria).trim().toLowerCase() === 'bebidas') {
+                    isBebida = true;
+                }
+            }
+            if(!isBebida) {
+                platosVendidos[plato] = (platosVendidos[plato] || 0) + cantidad;
+            }
         }
 
         if (vDate >= prevStartDate && vDate <= prevEndDate) {
@@ -875,6 +885,31 @@ function updateDashboard() {
             window.pieChartInstance.data.datasets[0].backgroundColor = colors;
         }
         window.pieChartInstance.update();
+    }
+
+    const saldoEfectivoEl = document.getElementById('dash-saldo-efectivo');
+    const saldoNequiEl = document.getElementById('dash-saldo-nequi');
+    if(saldoEfectivoEl && saldoNequiEl && dbData.flujo) {
+        let saldoEfe = 0;
+        let saldoNeq = 0;
+        const targetDateString = new Date(selectedDateStr + 'T12:00:00').toDateString();
+        
+        const rowFlujo = dbData.flujo.find(r => {
+            let rf = r.Fecha || r['Fecha '] || '';
+            if(!rf) return false;
+            let parts = String(rf).includes('/') ? String(rf).split('/') : String(rf).split('-');
+            if(parts.length < 3) return false;
+            let rDate = String(rf).includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(rf + 'T12:00:00');
+            return rDate.toDateString() === targetDateString;
+        });
+
+        if(rowFlujo) {
+            saldoEfe = Number(rowFlujo['Efectivo Caja'] || 0);
+            saldoNeq = Number(rowFlujo['Digital Nequi'] || 0);
+        }
+
+        saldoEfectivoEl.textContent = '$' + saldoEfe.toLocaleString();
+        saldoNequiEl.textContent = '$' + saldoNeq.toLocaleString();
     }
 
     populateSecondaryViews(startDate, endDate);

@@ -175,6 +175,23 @@
 
                         <div class="kpi-card">
                             <div class="kpi-header">
+                                <span class="label">Saldos al Cierre</span>
+                                <i data-lucide="wallet" style="color: var(--text-dim); width: 18px; height: 18px;"></i>
+                            </div>
+                            <div class="kpi-body" style="display: flex; gap: 15px; justify-content: space-between; margin-top: 10px;">
+                                <div style="flex: 1;">
+                                    <p class="sub-label" style="font-size: 0.75rem; margin-bottom: 3px; color: var(--text-dim);">Efectivo</p>
+                                    <h2 class="value" id="dash-saldo-efectivo" style="font-size: 1.25rem; color: var(--success);">$0</h2>
+                                </div>
+                                <div style="flex: 1; border-left: 1px solid var(--border-light); padding-left: 15px;">
+                                    <p class="sub-label" style="font-size: 0.75rem; margin-bottom: 3px; color: var(--text-dim);">Nequi</p>
+                                    <h2 class="value" id="dash-saldo-nequi" style="font-size: 1.25rem; color: var(--primary);">$0</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-header">
                                 <span class="label">Top 3 de Ventas</span>
                             </div>
                             <div class="kpi-body top-sales-list-box" id="top-ventas-list">

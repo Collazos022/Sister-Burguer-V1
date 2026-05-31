@@ -34,7 +34,10 @@ function doGet(e) {
     if (sheetMenu) {
       const dataMenu = sheetMenu.getDataRange().getValues();
       menuRows = dataMenu.slice(1).map(row => ({
-        id: row[0], nombre: row[1], precio: row[3] ? row[3].toString().replace(/[^0-9.-]+/g,"") : 0
+        id: row[0], 
+        nombre: row[1], 
+        categoria: row[2], 
+        precio: row[3] ? row[3].toString().replace(/[^0-9.-]+/g,"") : 0
       })).filter(r => r.id && r.nombre);
     }
     
