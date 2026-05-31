@@ -1327,7 +1327,7 @@ button:disabled {
 
 /* Fix for horizontal scroll and layout on mobile register view */
 #register {
-    display: block !important;
+    /* display: block !important; REMOVED to allow JS to hide it */
     width: 100%;
     overflow-x: hidden;
     overflow-y: auto; /* Ensure it scrolls */

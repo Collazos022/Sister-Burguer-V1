@@ -1,8 +1,8 @@
-const CACHE_NAME = 'sb-admin-cache-v3.0.0';
+const CACHE_NAME = 'sb-admin-cache-v3.0.1';
 const urlsToCache = [
   './',
   './index.html',
-  './style.css?v=1780190759237',
+  './style.css?v=1780191175868',
   './app.js?v=1780190759237',
   './SB_V.1.ico',
   './manifest.json',
