@@ -209,7 +209,7 @@ const titles = {
             }
 
             item = {
-                type: 'gasto',
+                type: 'expense',
                 categoria: cat,
                 descripcion: desc,
                 valor: valor
@@ -228,7 +228,7 @@ const titles = {
             }
 
             item = {
-                type: 'compra',
+                type: 'purchase',
                 categoria: cat,
                 insumo: insumo,
                 unidad: unidad,
@@ -1635,40 +1635,44 @@ function renderExpenseCart() {
     
     expenseCart.forEach((item, index) => {
         let title, desc;
-        if (item.type === 'gasto') {
+        if (item.type === 'expense') {
             title = item.descripcion;
             desc = item.categoria;
         } else {
-            let unitAbrev = item.unidad;
-            if (item.unidad) {
-                const match = item.unidad.match(/\(([^)]+)\)/);
-                if (match) unitAbrev = match[1];
-            }
-            // Clean up the insumo name to remove the unit if it's there
-            let insumoClean = item.insumo;
-            if (insumoClean.includes('(')) {
-                insumoClean = insumoClean.split(/\s*\d+\s*[A-Za-z]+.*\(/)[0].trim();
+            let unitAbrev = item.unidad || '';
+            // If the unit has parentheses, extract the abbreviation (e.g. "Kg", "und")
+            const match = unitAbrev.match(/\(([^)]+)\)/);
+            if (match) {
+                unitAbrev = match[1];
+                // If the extracted part is just a number (e.g. "200" from "Paquete (200)"), use the main word instead
+                if (!isNaN(unitAbrev)) {
+                    unitAbrev = item.unidad.split(' ')[0];
+                }
             }
             
-            title = `${item.cantidad} ${unitAbrev} - ${item.insumo}`;
+            // Clean up the insumo name if it already has the unit appended at the end
+            let insumoClean = item.insumo || '';
+            if (insumoClean.includes(' (')) {
+                insumoClean = insumoClean.split(' (')[0].trim();
+            }
+            
+            title = `${insumoClean} - ${item.cantidad} ${unitAbrev}`;
             desc = ''; 
         }
         
-        let price = item.type === 'gasto' ? item.valor : item.costoTotal;
+        let price = item.type === 'expense' ? item.valor : item.costoTotal;
         grandTotal += price;
         
         const li = document.createElement('li');
-        li.className = 'cart-item';
+        li.className = 'cart-item-row'; // THIS WAS THE BUG: was cart-item instead of cart-item-row
         
-        // Use cart-btn-remove to ensure it gets the transparent background and purple/red color
-        // And ensure layout is flex with cart-item-details taking up space
         li.innerHTML = `
             <div class="cart-item-details" style="flex: 1;">
                 <span class="cart-item-name" style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">${title}</span>
                 ${desc ? `<span class="cart-item-notes" style="font-size: 0.8rem; color: var(--text-light);">${desc}</span>` : ''}
             </div>
             <div class="cart-item-price" style="font-weight: bold; margin-right: 10px;">$${price.toLocaleString('es-CO')}</div>
-            <button type="button" class="cart-btn-remove" onclick="removeExpenseFromCart(${index})" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 5px;"><i data-lucide="trash-2"></i></button>
+            <button type="button" class="cart-btn-remove" onclick="removeExpenseFromCart(${index})" style="background: none; border: none; color: var(--primary); cursor: pointer; padding: 5px; display: flex; align-items: center;"><i data-lucide="trash-2"></i></button>
         `;
         list.appendChild(li);
     });
