@@ -1,52 +1,42 @@
-# Sister Burguer - POS & KDS System 🍔
+# Sister Burguer POS - Versión Estable V1
 
-Sister Burguer es una aplicación web progresiva (PWA) de Punto de Venta (POS) y Sistema de Visualización en Cocina (KDS). Está diseñada para ser rápida, ligera y funcionar de manera optimizada tanto en computadoras de escritorio como en dispositivos móviles y tablets.
+Bienvenido a la versión estable 1.0 de la aplicación administrativa y POS de Sister Burguer.
 
-## 🚀 Características Principales
+## Características Principales
 
-- **Interfaz de Punto de Venta (POS):** Toma de pedidos rápida e intuitiva con soporte para mesas, para llevar y domicilios.
-- **Cocina (KDS):** Visualización en tiempo real de los pedidos pendientes y preparados para el equipo de cocina.
-- **PWA (Progressive Web App):** Instalable en Android, iOS y Windows sin necesidad de tiendas de aplicaciones. Funciona a pantalla completa.
-- **Arquitectura Ligera:** Construida 100% con Vanilla JavaScript, HTML5 y CSS3. Sin frameworks pesados que ralenticen dispositivos antiguos.
-- **Modo Oscuro Elegante:** Interfaz gráfica moderna optimizada para entornos con poca luz (como barras o cocinas).
-- **Backend Serverless:** Integrado directamente con **Google Apps Script** y **Google Sheets** como base de datos en tiempo real.
+1. **Arquitectura PWA (Progressive Web App)**
+   - Soporte para funcionamiento Offline.
+   - Guardado automático en caché para tiempos de carga ultrarrápidos.
+   - Instalable en celulares (iOS/Android) como una aplicación nativa.
 
-## 🛠️ Tecnologías
+2. **Panel Administrativo Multiusuario**
+   - Control de roles integrado (Administrador, Servicio POS, Cocina).
+   - Layout diseñado con *Glassmorphism* moderno, sin colores planos, usando tipografía premium (Plus Jakarta Sans).
+   - Menú de navegación inferior exclusivo para móviles con botones adaptados.
 
-- **Frontend:** HTML, CSS, Vanilla JS
-- **Íconos:** Lucide Icons
-- **Backend:** Google Apps Script (Clasp)
-- **Base de Datos:** Google Sheets API
-- **Testing:** Playwright (Headless UI Automation)
+3. **Módulo de Compras y Gastos (Optimizados)**
+   - Sistema de registro masivo (lotes) de inventario y gastos operacionales.
+   - Auto-sincronización en la nube con Google Sheets, conservando todas las fórmulas de la base de datos de manera nativa.
 
-## 📂 Estructura del Proyecto
+4. **Sincronización en Tiempo Real**
+   - Integración con API de Google Apps Script.
+   - Manejo de flujo seguro (fetch/push) para evitar cruces de celdas y garantizar integridad de datos.
 
-```text
-/
-├── app.js               # Lógica principal del Punto de Venta y KDS
-├── style.css            # Estilos CSS, variables de diseño y Responsive Design
-├── index.html           # Interfaz de usuario (Pestañas, Modales, Grillas)
-├── sw.js                # Service Worker para caché y funcionalidad PWA
-├── manifest.json        # Manifiesto de la aplicación web (Instalabilidad)
-├── apps-script/         # Código del servidor (Google Apps Script)
-└── package.json         # Dependencias de entorno de desarrollo (Testing & Clasp)
-```
+## Estructura de Archivos (Versión Limpia)
 
-## ⚙️ Desarrollo y Pruebas
+Esta versión es el backup final estable, el repositorio ha sido purgado de archivos temporales y scripts de pruebas.
 
-Para trabajar en el entorno local con las herramientas de pruebas automatizadas:
+- `index.html`: UI / Front-End
+- `style.css`: Hojas de estilo y diseño responsivo
+- `app.js`: Lógica de la aplicación y comunicación API
+- `sw.js`: Service Worker (Caché y funcionalidad Offline)
+- `manifest.json`: Configuración de la App Móvil
+- `apps-script/`: Carpeta del backend para subir a Google Apps Script (`clasp`)
 
-1. Asegúrate de tener instalado [Node.js](https://nodejs.org/).
-2. Instala las dependencias del proyecto:
-   ```bash
-   npm install
-   ```
-3. Para interactuar con el backend de Google Apps Script:
-   ```bash
-   npx clasp login
-   npx clasp push
-   ```
+## Notas de Despliegue
 
-## 📝 Notas de Versión
-
-- **v2.3+:** Rediseño estético unificado, sistema de _Pills_ para estados de pedidos (Pendiente, Preparado, Entregado), y testing con Playwright.
+La página está actualmente alojada en **GitHub Pages**. Para futuras modificaciones:
+1. Modificar los archivos locales.
+2. Si se cambian archivos visuales o JS, incrementar la versión en `sw.js` (ej. `CACHE_NAME = 'sb-admin-cache-vX'`).
+3. Hacer un `git add .`, `git commit -m "mensaje"`, y `git push origin main`.
+4. Esperar ~2 minutos y forzar limpieza de caché en los dispositivos (`Ctrl + F5` en Windows, o reiniciar App en móvil).
