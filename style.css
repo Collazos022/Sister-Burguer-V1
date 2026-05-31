@@ -1299,3 +1299,12 @@ button:disabled {
         max-height: none !important;
     }
 }
+
+/* Overrides for Register full-page layout */
+#register {
+    padding: 20px;
+    box-sizing: border-box;
+}
+#register .pos-container {
+    padding: 0 !important;
+}

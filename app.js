@@ -1790,3 +1790,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+// --- Injected Register Tabs Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+    const btnTabPurchase = document.getElementById('btn-tab-purchase');
+    const btnTabExpense = document.getElementById('btn-tab-expense');
+    const hiddenCompra = document.getElementById('radio-compra-hidden');
+    const hiddenGasto = document.getElementById('radio-gasto-hidden');
+    const mainTitle = document.getElementById('main-title');
+    
+    if (btnTabPurchase && btnTabExpense) {
+        btnTabPurchase.addEventListener('click', (e) => {
+            e.preventDefault();
+            btnTabPurchase.classList.add('active');
+            btnTabExpense.classList.remove('active');
+            if(hiddenCompra) hiddenCompra.checked = true;
+            if(hiddenGasto) hiddenGasto.checked = false;
+            if(mainTitle) mainTitle.textContent = 'Registrar Compras';
+            if (hiddenCompra) hiddenCompra.dispatchEvent(new Event('change'));
+        });
+        btnTabExpense.addEventListener('click', (e) => {
+            e.preventDefault();
+            btnTabExpense.classList.add('active');
+            btnTabPurchase.classList.remove('active');
+            if(hiddenGasto) hiddenGasto.checked = true;
+            if(hiddenCompra) hiddenCompra.checked = false;
+            if(mainTitle) mainTitle.textContent = 'Registrar Gastos';
+            if (hiddenGasto) hiddenGasto.dispatchEvent(new Event('change'));
+        });
+    }
+});
