@@ -1305,7 +1305,7 @@ button:disabled {
     padding: 20px;
     box-sizing: border-box;
 }
-#register .pos-container {
+#register .pos-container, #pos .pos-container {
     padding: 0 !important;
 }
 
@@ -1332,7 +1332,7 @@ button:disabled {
     overflow-x: hidden;
     overflow-y: auto; /* Ensure it scrolls */
 }
-#register .pos-container {
+#register .pos-container, #pos .pos-container {
     display: block !important; /* Stack vertically */
     width: 100%;
     max-width: 100vw;
