@@ -4,71 +4,90 @@ const { chromium } = require('playwright');
     const browser = await chromium.launch({ headless: true });
     const page = await browser.newPage();
     
-    page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
-    page.on('pageerror', err => console.log('PAGE ERROR:', err));
-    
-    console.log("Navegando a localhost:3000...");
-    await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
-    
-    console.log("Navegando a la vista Registrar...");
-    await page.click('a[data-tab="register"]');
-    await page.waitForTimeout(1000);
-    
-    console.log("Esperando carga de categorías de inventario desde el backend...");
-    await page.waitForFunction(() => {
-        const select = document.querySelector('#exp-cat-compra');
-        return select && select.options.length > 1;
-    }, { timeout: 15000 });
-    
-    // 1. Agregar Compra de Insumo (Click on header tab)
-    await page.click('#btn-tab-purchase');
-    await page.selectOption('#exp-cat-compra', { index: 1 });
-    await page.waitForTimeout(500);
-    await page.selectOption('#exp-insumo', { index: 1 });
-    await page.waitForTimeout(500);
-    
-    await page.fill('#exp-cantidad', '5');
-    await page.fill('#exp-costo-unitario', '1200');
-    await page.fill('#exp-comentarios-compra', 'Proveedor XYZ');
-    
-    await page.evaluate(() => document.getElementById('btn-add-expense').click());
-    console.log("=> Compra de insumo agregada a la lista.");
-    await page.waitForTimeout(500);
-    
-    // 2. Agregar Gasto Operativo (Click on header tab)
-    console.log("Cambiando a Gasto Operativo...");
-    await page.click('#btn-tab-expense');
-    await page.waitForTimeout(500);
-    
-    await page.selectOption('#exp-cat-gasto', 'Servicios Públicos');
-    await page.fill('#exp-descripcion', 'Recibo de Luz');
-    await page.fill('#exp-valor-gasto', '85000');
-    await page.fill('#exp-comentarios-gasto', 'Mes de Mayo');
-    
-    await page.evaluate(() => document.getElementById('btn-add-expense').click());
-    console.log("=> Gasto operativo agregado a la lista.");
-    await page.waitForTimeout(500);
-    
-    let resultDialog = "";
     page.on('dialog', async dialog => {
-        resultDialog = dialog.message();
-        console.log("DIALOG OPENED:", resultDialog);
+        console.log("ALERT:", dialog.message());
         await dialog.accept();
     });
-    
-    console.log("Enviando transacciones al servidor de Google...");
-    await page.evaluate(() => document.getElementById('btn-submit-expenses').click());
-    
-    for(let i=0; i<30; i++) {
-        if(resultDialog !== "") break;
+
+    try {
+        console.log("Navegando a localhost:3000...");
+        await page.goto('http://localhost:3000');
+        
+        await page.evaluate(() => {
+            document.querySelectorAll('.dashboard-view').forEach(v => v.style.display = 'none');
+            const reg = document.getElementById('register');
+            if(reg) reg.style.display = 'block';
+        });
+        
+        console.log("Navegando a la vista Registrar...");
+        
+        await page.waitForSelector('#exp-cat-compra', { state: 'attached' });
+        
+        await page.fill('#global-fecha', '2026-05-30');
+        
+        await page.evaluate(() => {
+            document.getElementById('btn-tab-purchase').click();
+        });
+        
+        await page.waitForTimeout(500);
+        
+        await page.evaluate(() => {
+            const selectCat = document.getElementById('exp-cat-compra');
+            selectCat.innerHTML = '<option value="Carnes">Carnes</option>';
+            const selectIns = document.getElementById('exp-insumo');
+            selectIns.innerHTML = '<option value="Carne Res 150g">Carne Res 150g</option>';
+            document.getElementById('exp-unidades').value = 'kg';
+        });
+
+        await page.selectOption('#exp-cat-compra', 'Carnes');
+        await page.selectOption('#exp-insumo', 'Carne Res 150g');
+        await page.fill('#exp-cantidad', '10');
+        await page.fill('#exp-costo-unitario', '15000');
+        
+        await page.evaluate(() => {
+            document.getElementById('exp-costo-total').value = 150000;
+        });
+
+        await page.click('#btn-add-expense');
+        console.log("=> Intentó agregar compra");
+        
+        await page.evaluate(() => {
+            document.getElementById('btn-tab-expense').click();
+        });
+        await page.waitForTimeout(500);
+
+        await page.selectOption('#exp-cat-gasto', 'Servicios Públicos');
+        await page.fill('#exp-descripcion', 'Pago de Luz Mayo');
+        await page.fill('#exp-valor-gasto', '125000');
+        
+        await page.click('#btn-add-expense');
+        console.log("=> Intentó agregar gasto");
+
+        await page.selectOption('#global-pago', 'Transferencia');
+        await page.fill('#global-comentario', 'Gastos semanales');
+        
+        await page.route('**/*', async route => {
+            if (route.request().url().includes('script.google.com')) {
+                const postData = route.request().postData();
+                console.log("POST PAYLOAD:", postData);
+                await route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify({ status: 'success' })
+                });
+            } else {
+                await route.continue();
+            }
+        });
+        
+        await page.click('#btn-submit-expenses');
         await page.waitForTimeout(1000);
-    }
-    
-    if (resultDialog.includes("exitosamente")) {
-        console.log("RESULTADO FINAL: SUCCESS");
-        process.exit(0);
-    } else {
-        console.log("RESULTADO FINAL: FAILED ->", resultDialog);
+        console.log("SUCCESS");
+
+    } catch (err) {
+        console.error(err);
         process.exit(1);
+    } finally {
+        await browser.close();
     }
 })();

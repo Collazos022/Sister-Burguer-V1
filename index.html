@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1780191175869">
+    <link rel="stylesheet" href="style.css?v=1780191695502">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -341,89 +341,96 @@
             </div>
         
                 <section class="dashboard-view" id="register" style="display: none;">
-                    <div class="pos-container">
-                        <!-- PANEL IZQUIERDO: FORMULARIO -->
-                        <div class="pos-cart pos-cart-box form-scrollable" style="flex: 1 1 100%; max-width: 100%; padding: 20px; box-sizing: border-box;">
-                            
-                            
-                            <form id="entry-form">
-<div style="display:none;"><input type="radio" id="radio-compra-hidden" name="entry-type" value="purchase"><input type="radio" id="radio-gasto-hidden" name="entry-type" value="expense" checked></div>
-                                
+    <div class="pos-container">
+        <div class="pos-cart pos-cart-box form-scrollable" style="flex: 1 1 100%; max-width: 100%; padding: 20px; box-sizing: border-box;">
+            
+            <!-- FECHA GLOBAL -->
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="font-weight: bold; color: var(--text-main);">Fecha de Registro</label>
+                <input type="date" id="global-fecha" class="pos-input" required>
+            </div>
 
-                                <div class="form-body" id="form-gasto" style="display: none;">
-                                    <div class="form-group"><label>Fecha</label><input type="date" id="exp-fecha-gasto" class="pos-input" required></div>
-                                    <div class="form-group"><label>Categoría</label>
-                                        <select id="exp-cat-gasto" class="pos-select">
-                                            <option value="Administración">Administración</option>
-                                            <option value="Servicios Públicos">Servicios Públicos</option>
-                                            <option value="Nómina">Nómina</option>
-                                            <option value="Mantenimiento">Mantenimiento</option>
-                                            <option value="Marketing">Marketing</option>
-                                            <option value="Otros">Otros</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group"><label>Descripción</label><input type="text" id="exp-descripcion" class="pos-input"></div>
-                                    <div class="form-group"><label>Valor ($)</label><input type="number" id="exp-valor-gasto" class="pos-input"></div>
-                                    <div class="form-group"><label>Método Pago</label>
-                                        <select id="exp-pago-gasto" class="pos-select">
-                                            <option value="Efectivo">Efectivo</option>
-                                            <option value="Transferencia">Transferencia</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group"><label>Comentario</label><input type="text" id="exp-comentarios-gasto" class="pos-input"></div>
-                                </div>
+            <!-- LISTA DE AGREGADOS -->
+            <div class="pos-header pos-header-row" style="margin-bottom: 10px;">
+                <h3>Registros Agregados</h3>
+            </div>
+            <ul id="expense-cart-list" class="cart-items cart-items-container" style="max-height: 250px; overflow-y: auto; padding: 0; margin: 0; list-style: none;">
+                <div class="empty-text-state">Sin registros listados</div>
+            </ul>
+            <div class="pos-totals" style="padding: 10px 0;">
+                <div class="totals-row total" style="font-size: 1rem; border: none; padding: 0;">
+                    <span style="color: var(--text-light);">Subtotal Lista</span>
+                    <span id="expense-cart-total" style="color: var(--primary);">$0</span>
+                </div>
+            </div>
+            
+            <div class="cart-separator" style="border-top: 2px dashed var(--border-light); margin: 20px 0;"></div>
 
-                                <div class="form-body" id="form-compra" style="display: block;">
-                                    <div class="form-group"><label>Fecha</label><input type="date" id="exp-fecha-compra" class="pos-input" required></div>
-                                    <div class="form-group"><label>Categoría</label><select id="exp-cat-compra" class="pos-select"><option value="">Cargando...</option></select></div>
-                                    <div class="form-group"><label>Insumo</label><select id="exp-insumo" class="pos-select"><option value="">Seleccione Categoría primero</option></select></div>
-                                    <div class="form-group"><label>Unidades</label><input type="text" id="exp-unidades" class="pos-input" readonly disabled style="background: var(--bg-body);"></div>
-                                    <div style="display:flex; gap:10px;">
-                                        <div class="form-group" style="flex:1"><label>Cantidad</label><input type="number" id="exp-cantidad" class="pos-input" step="0.01"></div>
-                                        <div class="form-group" style="flex:1"><label>Costo Unitario ($)</label><input type="number" id="exp-costo-unitario" class="pos-input"></div>
-                                    </div>
-                                    <div class="form-group"><label>Costo Total ($)</label><input type="number" id="exp-costo-total" class="pos-input" readonly disabled style="font-weight:bold; color:var(--primary); background: var(--bg-body);"></div>
-                                    <div class="form-group"><label>Método Pago</label>
-                                        <select id="exp-pago-compra" class="pos-select">
-                                            <option value="Efectivo">Efectivo</option>
-                                            <option value="Transferencia">Transferencia</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group"><label>Comentarios</label><input type="text" id="exp-comentarios-compra" class="pos-input"></div>
-                                </div>
+            <!-- FORMULARIO PARA AGREGAR -->
+            <form id="entry-form">
+                <div style="display:none;">
+                    <input type="radio" id="radio-compra-hidden" name="entry-type" value="purchase">
+                    <input type="radio" id="radio-gasto-hidden" name="entry-type" value="expense" checked>
+                </div>
 
-                                <button type="submit" class="btn-primary" id="btn-add-expense" style="width: 100%; margin-top: 20px;"><i data-lucide="plus"></i> Agregar a la Lista</button>
-                            </form>
-                        </div>
-
-                        <!-- PANEL DERECHO: CARRITO -->
-                        <div class="pos-cart pos-cart-box" style="flex: 1; display: flex; flex-direction: column;">
-                            <div class="pos-header pos-header-row" style="margin-bottom: 1rem;">
-                                <h3>Lista a Registrar</h3>
-                            </div>
-                            
-                            <div class="cart-separator"></div>
-
-                            <ul id="expense-cart-list" class="cart-items cart-items-container" style="flex-grow: 1; overflow-y: auto; padding: 0; margin: 0; list-style: none;">
-                                <div class="empty-text-state">La lista está vacía</div>
-                            </ul>
-
-                            <div class="cart-separator"></div>
-                            
-                            <div class="pos-totals" style="padding: 15px;">
-                                <div class="totals-row total">
-                                    <span>Total Lote</span>
-                                    <span id="expense-cart-total">$0</span>
-                                </div>
-                                <button type="button" class="btn-primary" id="btn-submit-expenses" style="width: 100%; margin-top: 15px; background: var(--success); font-size: 1.1rem; padding: 15px;"><i data-lucide="save"></i> Registrar Todo</button>
-                            </div>
-                        </div>
+                <div class="form-body" id="form-gasto" style="display: none;">
+                    <div class="form-group"><label>Categoría</label>
+                        <select id="exp-cat-gasto" class="pos-select">
+                            <option value="Administración">Administración</option>
+                            <option value="Servicios Públicos">Servicios Públicos</option>
+                            <option value="Nómina">Nómina</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Otros">Otros</option>
+                        </select>
                     </div>
-                </section>
+                    <div class="form-group"><label>Descripción</label><input type="text" id="exp-descripcion" class="pos-input"></div>
+                    <div class="form-group"><label>Valor ($)</label><input type="number" id="exp-valor-gasto" class="pos-input"></div>
+                </div>
+
+                <div class="form-body" id="form-compra" style="display: block;">
+                    <div class="form-group"><label>Categoría</label><select id="exp-cat-compra" class="pos-select"><option value="">Cargando...</option></select></div>
+                    <div class="form-group"><label>Insumo</label><select id="exp-insumo" class="pos-select"><option value="">Seleccione Categoría primero</option></select></div>
+                    <div style="display:flex; gap:10px;">
+                        <div class="form-group" style="flex:1"><label>Unidades</label><input type="text" id="exp-unidades" class="pos-input" readonly disabled style="background: var(--bg-body);"></div>
+                        <div class="form-group" style="flex:1"><label>Cantidad</label><input type="number" id="exp-cantidad" class="pos-input" step="0.01"></div>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <div class="form-group" style="flex:1"><label>Costo Unit. ($)</label><input type="number" id="exp-costo-unitario" class="pos-input"></div>
+                        <div class="form-group" style="flex:1"><label>Costo Total ($)</label><input type="number" id="exp-costo-total" class="pos-input" readonly disabled style="font-weight:bold; color:var(--primary); background: var(--bg-body);"></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn-primary" id="btn-add-expense" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 8px;"><i data-lucide="plus"></i> Agregar</button>
+                </div>
+            </form>
+
+            <div class="cart-separator" style="border-top: 1px solid var(--border-light); margin: 20px 0;"></div>
+
+            <!-- GLOBAL FIELDS -->
+            <div class="form-group">
+                <label>Método de Pago General</label>
+                <select id="global-pago" class="pos-select">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Comentario General (Opcional)</label>
+                <input type="text" id="global-comentario" class="pos-input" placeholder="Aplica para todos los registros del lote">
+            </div>
+
+            <div class="pos-totals" style="margin-top: 20px;">
+                <button type="button" class="btn-primary" id="btn-submit-expenses" style="width: 100%; margin-top: 15px; background: var(--success); font-size: 1.1rem; padding: 15px;"><i data-lucide="save"></i> Registrar Todo</button>
+            </div>
+        </div>
+    </div>
+</section>
 </main>
     </div>
 
-    <script src="app.js?v=1780190759238"></script>
+    <script src="app.js?v=1780191695502"></script>
 </body>
 
 </html>

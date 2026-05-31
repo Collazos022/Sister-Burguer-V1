@@ -140,6 +140,11 @@ const titles = {
     const formGasto = document.getElementById('form-gasto');
     const formCompra = document.getElementById('form-compra');
 
+    const globalFechaInput = document.getElementById('global-fecha');
+    if (globalFechaInput && !globalFechaInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        globalFechaInput.value = today;
+    }
     const toggleFormType = () => {
         if(formVenta) formVenta.style.display = 'none';
         if(formGasto) formGasto.style.display = 'none';
@@ -192,70 +197,60 @@ const titles = {
         let item = {};
         
         if (radioVenta && radioVenta.checked) {
-            // NOT USED IN NEW WORKFLOW
             return;
         } else if (radioGasto && radioGasto.checked) {
             const cat = document.getElementById('exp-cat-gasto').value;
             const desc = document.getElementById('exp-descripcion').value;
             const valor = parseFloat(document.getElementById('exp-valor-gasto').value);
-            const pago = document.getElementById('exp-pago-gasto').value;
             
-            if(!cat || !desc || !valor) {
-                alert("Completa todos los campos obligatorios.");
+            if(!cat || !desc || isNaN(valor)) {
+                alert("Completa todos los campos obligatorios del gasto.");
                 return;
             }
-            
+
             item = {
-                type: 'expense',
-                fecha: document.getElementById('exp-fecha-gasto').value,
+                type: 'gasto',
                 categoria: cat,
                 descripcion: desc,
-                valor: valor,
-                pago: pago,
-                comentario: document.getElementById('exp-comentarios-gasto').value || '',
-                displayTitle: `Gasto: ${cat}`,
-                displayDesc: `${desc} | Valor: $${valor.toLocaleString('es-CO')} (${pago})`
+                valor: valor
             };
         } else if (radioCompra && radioCompra.checked) {
             const cat = document.getElementById('exp-cat-compra').value;
             const insumo = document.getElementById('exp-insumo').value;
-            const qty = parseFloat(document.getElementById('exp-cantidad').value);
-            const price = parseFloat(document.getElementById('exp-costo-unitario').value);
-            const pago = document.getElementById('exp-pago-compra').value;
-            const comentarios = document.getElementById('exp-comentarios-compra').value || '';
-            const provName = comentarios.includes('-') ? comentarios : 'COMPRA';
+            const unidad = document.getElementById('exp-unidades').value;
+            const cantidad = parseFloat(document.getElementById('exp-cantidad').value);
+            const costoUnit = parseFloat(document.getElementById('exp-costo-unitario').value);
+            const costoTotal = parseFloat(document.getElementById('exp-costo-total').value);
 
-            if(!cat || !insumo || !qty || !price) {
-                alert("Completa todos los campos obligatorios.");
+            if(!cat || !insumo || isNaN(cantidad) || isNaN(costoTotal)) {
+                alert("Completa todos los campos obligatorios de la compra.");
                 return;
             }
-            
+
             item = {
-                type: 'purchase',
-                fecha: document.getElementById('exp-fecha-compra').value,
-                proveedor: provName,
+                type: 'compra',
+                categoria: cat,
                 insumo: insumo,
-                cantidad: qty,
-                valor: price, // Costo Unitario
-                costo_total: qty * price,
-                pago: pago,
-                comentario: comentarios,
-                displayTitle: `Compra: ${insumo}`,
-                displayDesc: `Cant: ${qty} | Total: $${(qty * price).toLocaleString('es-CO')} (${pago})`
+                unidad: unidad,
+                cantidad: cantidad,
+                costoUnit: costoUnit,
+                costoTotal: costoTotal
             };
         }
         
         expenseCart.push(item);
-        renderExpenseCart();
         
-        // Reset specific fields
-        document.getElementById('exp-cantidad').value = '';
-        document.getElementById('exp-costo-unitario').value = '';
-        document.getElementById('exp-costo-total').value = '';
-        document.getElementById('exp-descripcion').value = '';
-        document.getElementById('exp-valor-gasto').value = '';
-        document.getElementById('exp-comentarios-compra').value = '';
-        document.getElementById('exp-comentarios-gasto').value = '';
+        // Limpiar form
+        if (radioGasto && radioGasto.checked) {
+            document.getElementById('exp-descripcion').value = '';
+            document.getElementById('exp-valor-gasto').value = '';
+        } else {
+            document.getElementById('exp-cantidad').value = '';
+            document.getElementById('exp-costo-unitario').value = '';
+            document.getElementById('exp-costo-total').value = '';
+        }
+        
+        renderExpenseCart();
     });
 
     const mainCtx = document.getElementById('mainChart').getContext('2d');
@@ -1630,36 +1625,33 @@ function renderExpenseCart() {
     if(!list) return;
     
     if(expenseCart.length === 0) {
-        list.innerHTML = '<div class="empty-text-state" style="font-size: 0.8rem;">La lista está vacía</div>';
-        totalEl.textContent = '$0';
+        list.innerHTML = '<div class="empty-text-state" style="font-size: 0.8rem;">Sin registros listados</div>';
+        if(totalEl) totalEl.textContent = '$0';
         return;
     }
     
-    let html = '';
+    list.innerHTML = '';
     let grandTotal = 0;
     
     expenseCart.forEach((item, index) => {
-        const itemTotal = item.type === 'purchase' ? item.costo_total : item.valor;
-        grandTotal += itemTotal;
+        let title = item.type === 'gasto' ? `${item.categoria} - ${item.descripcion}` : `${item.categoria} - ${item.insumo} (${item.cantidad} ${item.unidad})`;
+        let price = item.type === 'gasto' ? item.valor : item.costoTotal;
+        grandTotal += price;
         
-        html += `
-            <li class="cart-item" style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-color); padding: 5px 0;">
-                <div class="cart-item-details" style="display:flex; flex-direction:column;">
-                    <span class="cart-item-name" style="font-weight:bold; font-size:0.9rem;">${item.displayTitle}</span>
-                    <span class="cart-item-note" style="font-size:0.8rem; color:var(--text-light);">${item.displayDesc}</span>
-                </div>
-                <div class="cart-item-actions" style="display:flex; align-items:center; gap:10px;">
-                    <span class="cart-item-price" style="font-weight:bold; color:var(--primary);">$ ${itemTotal.toLocaleString('es-CO')}</span>
-                    <button type="button" class="btn-icon danger" onclick="removeExpenseFromCart(${index})" style="background:transparent; border:none; color:var(--danger); cursor:pointer;">
-                        <i data-lucide="trash-2"></i>
-                    </button>
-                </div>
-            </li>
+        const li = document.createElement('li');
+        li.className = 'cart-item';
+        li.innerHTML = `
+            <div class="cart-item-details">
+                <span class="cart-item-name">${title}</span>
+                <span class="cart-item-notes" style="color: var(--primary);">${item.type === 'gasto' ? 'Gasto Operativo' : 'Compra de Insumo'}</span>
+            </div>
+            <div class="cart-item-price">$${price.toLocaleString('es-CO')}</div>
+            <button type="button" class="btn-remove" onclick="removeExpenseFromCart(${index})"><i data-lucide="x"></i></button>
         `;
+        list.appendChild(li);
     });
     
-    list.innerHTML = html;
-    totalEl.textContent = `$${grandTotal.toLocaleString('es-CO')}`;
+    if(totalEl) totalEl.textContent = `$${grandTotal.toLocaleString('es-CO')}`;
     if(typeof lucide !== 'undefined') lucide.createIcons();
 }
 
@@ -1750,10 +1742,29 @@ function populateExpenseDropdowns() {
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-submit-expenses').addEventListener('click', async () => {
         if(expenseCart.length === 0) {
-            alert("La lista está vacía.");
+            alert("La lista de registros está vacía.");
             return;
         }
         
+        const globalFecha = document.getElementById('global-fecha').value;
+        const globalPago = document.getElementById('global-pago').value;
+        const globalComentario = document.getElementById('global-comentario').value || '';
+        
+        if (!globalFecha) {
+            alert("Por favor selecciona una Fecha de Registro.");
+            return;
+        }
+
+        // Apply global fields to all items in expenseCart
+        const finalCart = expenseCart.map(item => {
+            return {
+                ...item,
+                fecha: globalFecha,
+                pago: globalPago,
+                comentarios: globalComentario
+            };
+        });
+
         const btn = document.getElementById('btn-submit-expenses');
         const oldHtml = btn.innerHTML;
         btn.innerHTML = '<i data-lucide="loader" class="icon-small spinner"></i> Registrando...';
@@ -1762,7 +1773,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const payload = {
                 type: 'batch_transactions',
-                items: JSON.stringify(expenseCart)
+                items: JSON.stringify(finalCart)
             };
             
             const response = await fetch(API_URL, {
